@@ -74,7 +74,8 @@
               <label for="taskType">Тип задачи:</label>
               <select v-model="newTask.taskType" id="taskType" class="form-control">
                 <option value="NONE">NONE</option>
-                <option value="SQL">SQL</option>
+                <option value="PostgreSQL">PostgreSQL</option>
+                <option value="MySQL">MySQL</option>
                 <option value="QUESTION_BOX_ONE">Один вариант</option>
                 <option value="QUESTION_BOX_MULTI">Множественный выбор</option>
                 <option value="QUESTION_TEXT">Текст</option>
@@ -406,7 +407,10 @@ const createTask = async () => {
 
 const openEditPanelTask = (task) => {
   switch (task.taskType) {
-    case 'SQL':
+    case 'PostgreSQL':
+      router.push(`/teacher/courses/${route.params.id}/task/sql/${task.id}`);
+      break;
+    case 'MySQL':
       router.push(`/teacher/courses/${route.params.id}/task/sql/${task.id}`);
       break;
     case 'QUESTION_TEXT':

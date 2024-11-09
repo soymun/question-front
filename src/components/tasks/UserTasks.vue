@@ -62,7 +62,10 @@ const fetchTasks = async (courseId) => {
 const redirectToTask = (task) => {
   // Определяем путь в зависимости от типа задачи
   switch (task.taskType) {
-    case 'SQL':
+    case 'PostgreSQL':
+      router.push(`/courses/${route.params.id}/task/sql/${task.id}`);
+      break;
+    case 'MySQL':
       router.push(`/courses/${route.params.id}/task/sql/${task.id}`);
       break;
     case 'QUESTION_TEXT':

@@ -187,6 +187,13 @@ const fetchTaskData = async () => {
   const response = await axios.get(`http://localhost:8880/site/task/teacher/get/${route.params.taskId}`);
   task.value = response.data.data;
 
+  if (task.value.taskInfoSql == null){
+    task.value.taskInfoSql = {
+      id: 0,
+      checkSql: '',
+      mainSql: ''
+    };
+  }
 };
 
 const fetchAttempts = async () => {
