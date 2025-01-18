@@ -77,13 +77,11 @@ onMounted(() => {
 <style scoped>
 /* Градиент от белого к синему */
 .main-page {
-  background: #0d6efd;
   min-height: 100vh;
 }
 
 .hero {
   padding: 100px 0;
-  background: linear-gradient(to bottom, #ffffff, #0d6efd);
 }
 
 .info-section .card {
@@ -91,7 +89,6 @@ onMounted(() => {
 }
 
 .features-section {
-  background: linear-gradient(to top, #ffffff, #0d6efd);
 }
 
 .features-section i {
