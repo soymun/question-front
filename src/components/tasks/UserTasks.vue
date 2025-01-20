@@ -77,6 +77,9 @@ const redirectToTask = (task) => {
     case 'QUESTION_BOX_MULTI':
       router.push(`/courses/${route.params.id}/task/box/${task.id}`);
       break;
+    case 'QUESTION_BOX_ONE':
+      router.push(`/courses/${route.params.id}/task/box/${task.id}`);
+      break;
     case 'CODE':
       router.push(`/courses/${route.params.id}/task/code/${task.id}`);
       break;

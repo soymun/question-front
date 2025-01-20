@@ -61,7 +61,7 @@
             class="form-control mb-3"
             rows="10"
             placeholder="Введите код"
-            style="height: 80%"
+            style="min-height: 65vh"
         ></textarea>
 
         <!-- Кнопка "Сдать" -->
@@ -133,9 +133,19 @@
 </template>
 
 <script setup>
-import {onMounted, ref, watch} from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import axios from 'axios';
-import {useRoute, useRouter} from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import CodeMirror from 'codemirror';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/dracula.css';
+import 'codemirror/mode/clike/clike'; // Для Java, C, C++
+import 'codemirror/mode/python/python'; // Для Python
+import 'codemirror/mode/javascript/javascript'; // Для JavaScript
+import 'codemirror/mode/sql/sql'; // Для SQL
+import 'codemirror/mode/htmlmixed/htmlmixed'; // Для HTML
+import 'codemirror/mode/css/css'; // Для CSS
+import 'codemirror/mode/xml/xml'; // Для XML
 
 const router = useRouter();
 const route = useRoute();
@@ -149,6 +159,20 @@ const isModalVisible = ref(false);
 const comments = ref([]);
 const newComment = ref('');
 const selectedLanguage = ref({});
+let codeMirrorInstance = null;
+
+// Карта режимов для языков
+const languageModes = {
+  java: 'text/x-java',
+  python: 'text/x-python',
+  javascript: 'text/javascript',
+  sql: 'text/x-sql',
+  html: 'text/html',
+  css: 'text/css',
+  xml: 'application/xml',
+  c: 'text/x-csrc',
+  cpp: 'text/x-c++src',
+};
 
 const goBack = () => {
   router.push(`/courses/${route.params.cId}`);
@@ -172,6 +196,24 @@ const fetchTaskInfo = async (taskId) => {
 // Следим за изменением выбранного языка, чтобы обновить код
 watch(selectedLanguage, (newCode) => {
   userCode.value = newCode.initCode;
+  if (codeMirrorInstance) {
+    codeMirrorInstance.setValue(userCode.value); // Синхронизация с CodeMirror
+  }
+});
+
+const changeLanguageMode = (language) => {
+  if (codeMirrorInstance && languageModes[language]) {
+    codeMirrorInstance.setOption('mode', languageModes[language]);
+    codeMirrorInstance.refresh(); // Перерисовываем редактор
+  }
+};
+
+// Отслеживание изменения выбранного языка
+watch(selectedLanguage, (newLanguage) => {
+  if (newLanguage && newLanguage.codeType && newLanguage.codeType.name) {
+    const language = newLanguage.codeType.name.toLowerCase(); // Приводим к нижнему регистру
+    changeLanguageMode(language);
+  }
 });
 
 const formatDate = (dateString) => {
@@ -256,6 +298,23 @@ onMounted(() => {
   fetchTaskInfo(taskId);
   fetchAttempts(taskId);
   fetchComments(taskId);
+
+  const textarea = document.querySelector('.form-control.mb-3');
+
+  codeMirrorInstance = CodeMirror.fromTextArea(textarea, {
+    mode: 'text/x-java', // Начальный режим для Java
+    theme: 'dracula',
+    lineNumbers: true,
+    extraKeys: {
+      'Ctrl-Space': 'autocomplete',
+    },
+  });
+
+  codeMirrorInstance.on('change', (instance) => {
+    userCode.value = instance.getValue();
+  });
+
+  codeMirrorInstance.setSize(null, '70vh');
 });
 
 const showSql = (sqlCode) => {

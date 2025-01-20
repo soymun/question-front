@@ -1,5 +1,5 @@
 <template>
-  <div class="container mt-4">
+  <div class="container mt-4 h-100">
     <!-- Контейнер для кнопки "Назад" и Tabs -->
     <div class="d-flex justify-content-between align-items-center mb-3">
       <!-- Кнопка "Назад" -->
@@ -35,7 +35,7 @@
     </div>
 
     <!-- Содержимое вкладок -->
-    <div v-if="activeTab === 'task'" class="row mt-4" style="height: 90%">
+    <div v-if="activeTab === 'task'" class="row mt-4" style="min-height: 75vh">
       <div class="col-md-6">
         <h5>{{taskInfo.name}}</h5>
         <p v-html="taskInfo.description"></p>
@@ -46,13 +46,14 @@
         <div style="border-left: 1px solid #ccc; height: 100%;"></div>
       </div>
 
-      <div class="col-md-5" style="height: 100%;">
+      <div class="col-md-5" style="min-height: 75vh;">
         <textarea
+            v-if="activeTab === 'task'"
             v-model="userSql"
             class="form-control mb-3"
             rows="10"
             placeholder="Введите SQL запрос"
-            style="height: 90%; resize: none"
+            style="resize: none"
         ></textarea>
 
         <!-- Кнопки в одну линию -->
@@ -142,7 +143,7 @@
     </div>
 
     <!-- Комментарии -->
-    <div v-if="activeTab === 'comments'" class="mt-4" style="height: 70%; width: 100%;">
+    <div v-if="activeTab === 'comments'" class="mt-4" style="min-height: 70%; width: 100%;">
       <div class="h-100 overflow-auto">
         <div v-for="comment in comments" :key="comment.id" class="border p-3 mb-3">
           <div class="d-flex justify-content-between">
@@ -162,9 +163,16 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import axios from 'axios';
-import {useRoute, useRouter} from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import CodeMirror from 'codemirror';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/dracula.css';
+import 'codemirror/mode/sql/sql';
+import 'codemirror/addon/hint/sql-hint';
+import 'codemirror/addon/hint/show-hint.css';
+import 'codemirror/addon/hint/show-hint';
 
 const router = useRouter();
 const route = useRoute();
@@ -179,6 +187,32 @@ const isModalVisible = ref(false);
 const isModalVisibleSql = ref(false);
 const comments = ref([]);
 const newComment = ref('');
+let textarea = null;
+
+onMounted(() => {
+  const taskId = route.params.id;
+  fetchTaskInfo(taskId);
+  fetchComments(taskId);
+  fetchAttempts(taskId);
+
+  textarea = document.querySelector('.form-control.mb-3');
+
+  const codeMirrorInstance = CodeMirror.fromTextArea(textarea, {
+    mode: 'text/x-sql',
+    theme: 'dracula',
+    lineNumbers: true,
+    extraKeys: {
+      'Ctrl-Space': 'autocomplete',
+    },
+  });
+
+  codeMirrorInstance.on('change', (instance) => {
+    userSql.value = instance.getValue();
+  });
+
+  codeMirrorInstance.setSize(null, '75vh');
+
+});
 
 const goBack = () => {
   router.push(`/courses/${route.params.cId}`);
@@ -282,13 +316,6 @@ const showSql = (sql) => {
   currentSql.value = sql;
   isModalVisible.value = true;
 };
-
-onMounted(() => {
-  const taskId = route.params.id;
-  fetchTaskInfo(taskId);
-  fetchComments(taskId);
-  fetchAttempts(taskId)
-});
 </script>
 
 <style scoped>
@@ -326,4 +353,5 @@ onMounted(() => {
   transition: transform 0.2s;
   cursor: pointer;
 }
+
 </style>
