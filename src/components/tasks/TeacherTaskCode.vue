@@ -216,10 +216,11 @@ const codeTypes = ref([]);      // Массив с типами кода
 const selectedCodeIndex = ref(null);  // Индекс выбранного типа кода
 const isAddDialogVisible = ref(false); // Видимость модального окна добавления
 const newCodeTypeId = ref(null);  // Выбранный тип кода для добавления
+const apiUrl = import.meta.env.VITE_API_HOST;
 
 const openAddDialog = async () => {
   // Получение типов кода с сервера
-  const response = await axios.get('http://localhost:8880/site/dc/code-type');
+  const response = await axios.get(apiUrl + '/site/dc/code-type');
   codeTypes.value = response.data.data;
   isAddDialogVisible.value = true;
 };
@@ -270,14 +271,14 @@ const goToCourse = () => {
   router.push(`/teacher/courses/${route.params.id}`);
 };
 const fetchTaskData = async () => {
-  const response = await axios.get(`http://localhost:8880/site/task/teacher/get/${route.params.taskId}`);
+  const response = await axios.get(apiUrl + `/site/task/teacher/get/${route.params.taskId}`);
   task.value = response.data.data;
   taskInfoCode.value = task.value.taskInfoCode;
 };
 
 const fetchAttempts = async () => {
   try {
-    const response = await axios.get(`http://localhost:8880/site/task/history/task/${route.params.taskId}`);
+    const response = await axios.get(apiUrl + `/site/task/history/task/${route.params.taskId}`);
     attempts.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch attempts:', error);
@@ -303,19 +304,19 @@ const formatDate = (dateString) => {
 
 const saveTask = async () => {
   task.value.taskInfoCode = taskInfoCode.value;
-  await axios.post('http://localhost:8880/site/task', task.value);
+  await axios.post(apiUrl + '/site/task', task.value);
 };
 
 const fetchComments = async () => {
-  const response = await axios.get(`http://localhost:8880/site/comments/task/${route.params.taskId}/all`)
+  const response = await axios.get(apiUrl + `/site/comments/task/${route.params.taskId}/all`)
   comments.value = response.data.data;
 };
 const deleteComment = async (commentId) => {
-  await axios.delete(`http://localhost:8880/site/comments/${commentId}`)
+  await axios.delete(apiUrl + `/site/comments/${commentId}`)
   await fetchComments();
 };
 const applyComment = async (commentId) => {
-  await axios.put(`http://localhost:8880/site/comments/apply/${commentId}`);
+  await axios.put(apiUrl + `/site/comments/apply/${commentId}`);
   await fetchComments();
 };
 const submitComment = async () => {
@@ -325,7 +326,7 @@ const submitComment = async () => {
   }
 
   try {
-    await axios.post('http://localhost:8880/site/comments', {
+    await axios.post(apiUrl + '/site/comments', {
       task: route.params.taskId,
       message: newComment.value,
     });

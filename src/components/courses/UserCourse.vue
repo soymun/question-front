@@ -9,7 +9,7 @@
           <div class="row g-0">
             <!-- Иконка курса -->
             <div class="col-md-4">
-              <img :src="`http://localhost:8880/site/file/file/jpg/${courseData.course.pathImage}`"
+              <img :src="`${apiUrl}/site/file/file/jpg/${courseData.course.pathImage}`"
                    alt="Course Image"
                    class="img-fluid rounded-start course-image">
             </div>
@@ -48,10 +48,11 @@ import axios from 'axios';
 const userCourses = ref([]);
 const router = useRouter();
 const hoveredCourse = ref(null); // Переменная для отслеживания наведения на курс
+const apiUrl = import.meta.env.VITE_API_HOST;
 
 const fetchUserCourses = async () => {
   try {
-    const response = await axios.get('http://localhost:8880/site/user/courses/user');
+    const response = await axios.get(apiUrl + '/site/user/courses/user');
     userCourses.value = response.data.data;
   } catch (error) {
     console.error('Error fetching courses:', error);

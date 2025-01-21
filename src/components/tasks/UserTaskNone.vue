@@ -66,6 +66,7 @@ const activeTab = ref('task');
 const taskInfo = ref({});
 const comments = ref([]);
 const newComment = ref('');
+const apiUrl = import.meta.env.VITE_API_HOST;
 
 const goBack = () => {
   router.push(`/courses/${route.params.cId}`);
@@ -73,7 +74,7 @@ const goBack = () => {
 
 const fetchTaskInfo = async (taskId) => {
   try {
-    const response = await axios.get(`http://localhost:8880/site/task/user/get/${taskId}`);
+    const response = await axios.get(apiUrl + `/site/task/user/get/${taskId}`);
     taskInfo.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch task info:', error);
@@ -95,7 +96,7 @@ const formatDate = (dateString) => {
 // Получение комментариев
 const fetchComments = async (taskId) => {
   try {
-    const response = await axios.get(`http://localhost:8880/site/comments/task/${taskId}`);
+    const response = await axios.get(apiUrl + `/site/comments/task/${taskId}`);
     comments.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch comments:', error);
@@ -110,7 +111,7 @@ const submitComment = async () => {
   }
 
   try {
-    await axios.post('http://localhost:8880/site/comments', {
+    await axios.post(apiUrl + '/site/comments', {
       task: taskInfo.value.id,
       message: newComment.value,
     });

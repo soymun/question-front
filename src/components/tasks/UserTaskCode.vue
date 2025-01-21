@@ -160,6 +160,7 @@ const comments = ref([]);
 const newComment = ref('');
 const selectedLanguage = ref({});
 let codeMirrorInstance = null;
+const apiUrl = import.meta.env.VITE_API_HOST;
 
 // Карта режимов для языков
 const languageModes = {
@@ -181,7 +182,7 @@ const goBack = () => {
 // Функция для загрузки данных задачи
 const fetchTaskInfo = async (taskId) => {
   try {
-    const response = await axios.get(`http://localhost:8880/site/task/user/get/${taskId}`);
+    const response = await axios.get(apiUrl + `/site/task/user/get/${taskId}`);
     taskInfo.value = response.data.data;
     // Инициализация кода в текстовое поле
     if (taskInfo.value.taskInfoCode.length > 0) {
@@ -231,7 +232,7 @@ const formatDate = (dateString) => {
 // Отправка задачи
 const submitTask = async () => {
   try {
-    await axios.post('http://localhost:8880/site/task/execute', {
+    await axios.post(apiUrl + '/site/task/execute', {
       taskId: taskInfo.value.id,
       executeCodeDto: {
         dcCodeTypeDto: {
@@ -250,7 +251,7 @@ const submitTask = async () => {
 // Получение комментариев
 const fetchComments = async (taskId) => {
   try {
-    const response = await axios.get(`http://localhost:8880/site/comments/task/${taskId}`);
+    const response = await axios.get(apiUrl + `/site/comments/task/${taskId}`);
     comments.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch comments:', error);
@@ -265,7 +266,7 @@ const submitComment = async () => {
   }
 
   try {
-    await axios.post('http://localhost:8880/site/comments', {
+    await axios.post(apiUrl + '/site/comments', {
       task: taskInfo.value.id,
       message: newComment.value,
     });
@@ -281,7 +282,7 @@ const submitComment = async () => {
 // Получение попыток выполнения задачи
 const fetchAttempts = async (taskId) => {
   try {
-    const response = await axios.get(`http://localhost:8880/site/task/history/task/user/${taskId}`);
+    const response = await axios.get(apiUrl + `/site/task/history/task/user/${taskId}`);
     attempts.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch attempts:', error);

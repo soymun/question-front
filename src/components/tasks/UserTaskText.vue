@@ -68,6 +68,7 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
+const apiUrl = import.meta.env.VITE_API_HOST;
 
 const router = useRouter();
 const route = useRoute();
@@ -94,7 +95,7 @@ const formatDate = (dateString) => {
 // Загрузка информации о задаче
 const fetchTaskInfo = async (taskId) => {
   try {
-    const response = await axios.get(`http://localhost:8880/site/task/user/get/${taskId}`);
+    const response = await axios.get(apiUrl + `/site/task/user/get/${taskId}`);
     taskInfo.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch task info:', error);
@@ -104,7 +105,7 @@ const fetchTaskInfo = async (taskId) => {
 // Загрузка комментариев
 const fetchComments = async (taskId) => {
   try {
-    const response = await axios.get(`http://localhost:8880/site/comments/task/${taskId}`);
+    const response = await axios.get(apiUrl + `/site/comments/task/${taskId}`);
     comments.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch comments:', error);
@@ -119,7 +120,7 @@ const submitComment = async () => {
   }
 
   try {
-    await axios.post('http://localhost:8880/site/comments', {
+    await axios.post(apiUrl + '/site/comments', {
       task: taskInfo.value.id,
       message: newComment.value,
     });
@@ -133,7 +134,7 @@ const submitComment = async () => {
 // Отправка решения задачи
 const submitTask = async () => {
   try {
-    const response = await axios.post('http://localhost:8880/site/task/execute', {
+    const response = await axios.post(apiUrl + '/site/task/execute', {
       taskId: taskInfo.value.id,
       executeTextDto: {answer: userText.value},
     });

@@ -19,7 +19,7 @@
           <div class="row g-0">
             <!-- Иконка курса -->
             <div class="col-md-4">
-              <img :src="`http://localhost:8880/site/file/file/jpg/${course.pathImage}`" alt="Course Image"
+              <img :src="`${apiUrl}/site/file/file/jpg/${course.pathImage}`" alt="Course Image"
                    class="img-fluid rounded-start course-image">
             </div>
 
@@ -95,10 +95,11 @@ const isEditing = ref(false);
 const courseData = ref({courseName: '', about: '', pathImage: '', courseType: 'USUALLY', timeExecute: ''});
 const courseIdToEdit = ref(null);
 const router = useRouter();
+const apiUrl = import.meta.env.VITE_API_HOST;
 
 const fetchCourses = async () => {
   try {
-    const response = await axios.post('http://localhost:8880/site/courses/search', {
+    const response = await axios.post(apiUrl + '/site/courses/search', {
       query: searchQuery.value,
       teacher: true
     });
@@ -140,7 +141,7 @@ const saveCourse = async () => {
       const formData = new FormData();
       formData.append('multipartFile', file.value);
 
-      const fileResponse = await axios.post('http://localhost:8880/site/file/save/file', formData, {
+      const fileResponse = await axios.post(apiUrl + '/site/file/save/file', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -150,13 +151,13 @@ const saveCourse = async () => {
     }
 
     if (isEditing.value) {
-      await axios.put('http://localhost:8880/site/courses', {
+      await axios.put(apiUrl + '/site/courses', {
         id: courseIdToEdit.value,
         ...courseData.value,
         pathImage: uploadedFileName,
       });
     } else {
-      await axios.post('http://localhost:8880/site/courses', {
+      await axios.post(apiUrl + '/site/courses', {
         ...courseData.value,
         pathImage: uploadedFileName,
         open: true,
@@ -172,7 +173,7 @@ const saveCourse = async () => {
 
 const deleteCourse = async (id) => {
   try {
-    await axios.delete(`http://localhost:8880/site/courses/${id}`);
+    await axios.delete(apiUrl + `/site/courses/${id}`);
     fetchCourses();
   } catch (error) {
     console.error('Failed to delete course:', error);

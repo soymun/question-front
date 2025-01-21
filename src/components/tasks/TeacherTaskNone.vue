@@ -109,13 +109,14 @@ const task = ref({
 const attempts = ref([]);
 const comments = ref([]);
 const newComment = ref('');
+const apiUrl = import.meta.env.VITE_API_HOST;
 
 
 const goToCourse = () => {
   router.push(`/teacher/courses/${route.params.id}`);
 };
 const fetchTaskData = async () => {
-  const response = await axios.get(`http://localhost:8880/site/task/teacher/get/${route.params.taskId}`);
+  const response = await axios.get(apiUrl + `/site/task/teacher/get/${route.params.taskId}`);
   task.value = response.data.data;
 
 };
@@ -133,18 +134,18 @@ const formatDate = (dateString) => {
 };
 
 const saveTask = async () => {
-  await axios.post('http://localhost:8880/site/task', task.value);
+  await axios.post(apiUrl + '/site/task', task.value);
 };
 const fetchComments = async () => {
-  const response = await axios.get(`http://localhost:8880/site/comments/task/${route.params.taskId}/all`)
+  const response = await axios.get(apiUrl + `/site/comments/task/${route.params.taskId}/all`)
   comments.value = response.data.data;
 };
 const deleteComment = async (commentId) => {
-  await axios.delete(`http://localhost:8880/site/comments/${commentId}`)
+  await axios.delete(apiUrl + `/site/comments/${commentId}`)
   await fetchComments();
 };
 const applyComment = async (commentId) => {
-  await axios.put(`http://localhost:8880/site/comments/apply/${commentId}`);
+  await axios.put(apiUrl + `/site/comments/apply/${commentId}`);
   await fetchComments();
 };
 const submitComment = async () => {
@@ -154,7 +155,7 @@ const submitComment = async () => {
   }
 
   try {
-    await axios.post('http://localhost:8880/site/comments', {
+    await axios.post(apiUrl + '/site/comments', {
       task: route.params.taskId,
       message: newComment.value,
     });
