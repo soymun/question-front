@@ -9,7 +9,7 @@
           <div class="row g-0">
             <!-- Иконка курса -->
             <div class="col-md-4">
-              <img :src="`${apiUrl}/site/file/file/jpg/${courseData.course.pathImage}`"
+              <img :src="`${apiUrl}/file/file/jpg/${courseData.course.pathImage}`"
                    alt="Course Image"
                    class="img-fluid rounded-start course-image">
             </div>
@@ -52,7 +52,7 @@ const apiUrl = import.meta.env.VITE_API_HOST;
 
 const fetchUserCourses = async () => {
   try {
-    const response = await axios.get(apiUrl + '/site/user/courses/user');
+    const response = await axios.get(apiUrl + '/user/courses/user');
     userCourses.value = response.data.data;
   } catch (error) {
     console.error('Error fetching courses:', error);

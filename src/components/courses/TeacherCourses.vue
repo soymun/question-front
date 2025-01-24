@@ -19,7 +19,7 @@
           <div class="row g-0">
             <!-- Иконка курса -->
             <div class="col-md-4">
-              <img :src="`${apiUrl}/site/file/file/jpg/${course.pathImage}`" alt="Course Image"
+              <img :src="`${apiUrl}/file/file/jpg/${course.pathImage}`" alt="Course Image"
                    class="img-fluid rounded-start course-image">
             </div>
 
@@ -32,9 +32,13 @@
                     <p class="card-text text-truncate text-wrap">{{ course.about.substring(0, 50) }}</p>
                   </div>
 
-                  <div class="mt-auto d-flex row justify-content-center align-content-center h-100">
-                    <button @click.stop="openEditDialog(course)" class="btn btn-warning btn-sm mb-1">Изменить</button>
-                    <button @click.stop="deleteCourse(course.id)" class="btn btn-danger btn-sm">Удалить</button>
+                  <div class="mt-auto d-flex row justify-content-center align-content-center h-100 w-25">
+                    <button @click.stop="openEditDialog(course)" class="btn btn-warning btn-sm mb-1">
+                      <i class="bi bi-pencil"></i> <!-- Иконка редактирования -->
+                    </button>
+                    <button @click.stop="deleteCourse(course.id)" class="btn btn-danger btn-sm">
+                      <i class="bi bi-trash"></i> <!-- Иконка удаления -->
+                    </button>
                   </div>
                 </div>
               </div>
@@ -82,6 +86,7 @@
   </div>
 </template>
 
+
 <script setup>
 import {onMounted, ref} from 'vue';
 import axios from 'axios';
@@ -99,7 +104,7 @@ const apiUrl = import.meta.env.VITE_API_HOST;
 
 const fetchCourses = async () => {
   try {
-    const response = await axios.post(apiUrl + '/site/courses/search', {
+    const response = await axios.post(apiUrl + '/courses/search', {
       query: searchQuery.value,
       teacher: true
     });
@@ -141,7 +146,7 @@ const saveCourse = async () => {
       const formData = new FormData();
       formData.append('multipartFile', file.value);
 
-      const fileResponse = await axios.post(apiUrl + '/site/file/save/file', formData, {
+      const fileResponse = await axios.post(apiUrl + '/file/save/file', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -151,13 +156,13 @@ const saveCourse = async () => {
     }
 
     if (isEditing.value) {
-      await axios.put(apiUrl + '/site/courses', {
+      await axios.put(apiUrl + '/courses', {
         id: courseIdToEdit.value,
         ...courseData.value,
         pathImage: uploadedFileName,
       });
     } else {
-      await axios.post(apiUrl + '/site/courses', {
+      await axios.post(apiUrl + '/courses', {
         ...courseData.value,
         pathImage: uploadedFileName,
         open: true,
@@ -173,8 +178,8 @@ const saveCourse = async () => {
 
 const deleteCourse = async (id) => {
   try {
-    await axios.delete(apiUrl + `/site/courses/${id}`);
-    fetchCourses();
+    await axios.delete(apiUrl + `/courses/${id}`);
+    await fetchCourses();
   } catch (error) {
     console.error('Failed to delete course:', error);
   }

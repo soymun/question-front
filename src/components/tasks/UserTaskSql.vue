@@ -221,7 +221,7 @@ const goBack = () => {
 
 const fetchTaskInfo = async (taskId) => {
   try {
-    const response = await axios.get(apiUrl + `/site/task/user/get/${taskId}`);
+    const response = await axios.get(apiUrl + `/task/${taskId}`);
     taskInfo.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch task info:', error);
@@ -230,7 +230,7 @@ const fetchTaskInfo = async (taskId) => {
 
 const fetchAttempts = async (taskId) => {
   try {
-    const response = await axios.get(apiUrl + `/site/task/history/task/user/${taskId}`);
+    const response = await axios.get(apiUrl + `/task/history/task/user/${taskId}`);
     attempts.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch attempts:', error);
@@ -239,7 +239,7 @@ const fetchAttempts = async (taskId) => {
 
 const executeTask = async () => {
   try {
-    const response = await axios.post(apiUrl + '/site/courses/execute', {
+    const response = await axios.post(apiUrl + '/courses/execute', {
       courseId: taskInfo.value.courses,
       userSql: userSql.value,
     });
@@ -264,7 +264,7 @@ const formatDate = (dateString) => {
 
 const fetchComments = async (taskId) => {
   try {
-    const response = await axios.get(apiUrl + `/site/comments/task/${taskId}`);
+    const response = await axios.get(apiUrl + `/comments/user/task/${taskId}`);
     comments.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch comments:', error);
@@ -278,7 +278,7 @@ const submitComment = async () => {
   }
 
   try {
-    await axios.post(apiUrl + '/site/comments', {
+    await axios.post(apiUrl + '/comments', {
       task: taskInfo.value.id,
       message: newComment.value,
     });
@@ -292,7 +292,7 @@ const submitComment = async () => {
 
 const submitTask = async () => {
   try {
-    await axios.post(apiUrl + '/site/task/execute', {
+    await axios.post(apiUrl + '/task/execute', {
       taskId: taskInfo.value.id,
       executeSqlDto: {
         userSql: userSql.value

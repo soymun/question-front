@@ -220,7 +220,7 @@ const apiUrl = import.meta.env.VITE_API_HOST;
 
 const openAddDialog = async () => {
   // Получение типов кода с сервера
-  const response = await axios.get(apiUrl + '/site/dc/code-type');
+  const response = await axios.get(apiUrl + '/dc/code-type');
   codeTypes.value = response.data.data;
   isAddDialogVisible.value = true;
 };
@@ -271,14 +271,14 @@ const goToCourse = () => {
   router.push(`/teacher/courses/${route.params.id}`);
 };
 const fetchTaskData = async () => {
-  const response = await axios.get(apiUrl + `/site/task/teacher/get/${route.params.taskId}`);
+  const response = await axios.get(apiUrl + `/task/teacher/${route.params.taskId}`);
   task.value = response.data.data;
   taskInfoCode.value = task.value.taskInfoCode;
 };
 
 const fetchAttempts = async () => {
   try {
-    const response = await axios.get(apiUrl + `/site/task/history/task/${route.params.taskId}`);
+    const response = await axios.get(apiUrl + `/task/history/task/${route.params.taskId}`);
     attempts.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch attempts:', error);
@@ -304,19 +304,19 @@ const formatDate = (dateString) => {
 
 const saveTask = async () => {
   task.value.taskInfoCode = taskInfoCode.value;
-  await axios.post(apiUrl + '/site/task', task.value);
+  await axios.post(apiUrl + '/task', task.value);
 };
 
 const fetchComments = async () => {
-  const response = await axios.get(apiUrl + `/site/comments/task/${route.params.taskId}/all`)
+  const response = await axios.get(apiUrl + `/comments/teacher/task/${route.params.taskId}`)
   comments.value = response.data.data;
 };
 const deleteComment = async (commentId) => {
-  await axios.delete(apiUrl + `/site/comments/${commentId}`)
+  await axios.delete(apiUrl + `/comments/${commentId}`)
   await fetchComments();
 };
 const applyComment = async (commentId) => {
-  await axios.put(apiUrl + `/site/comments/apply/${commentId}`);
+  await axios.put(apiUrl + `/comments/apply/${commentId}`);
   await fetchComments();
 };
 const submitComment = async () => {
@@ -326,7 +326,7 @@ const submitComment = async () => {
   }
 
   try {
-    await axios.post(apiUrl + '/site/comments', {
+    await axios.post(apiUrl + '/comments', {
       task: route.params.taskId,
       message: newComment.value,
     });

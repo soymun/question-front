@@ -67,7 +67,7 @@ const apiUrl = import.meta.env.VITE_API_HOST;
 
 const fetchGroups = async () => {
   try {
-    const response = await axios.get(apiUrl + '/site/groups');
+    const response = await axios.get(apiUrl + '/groups');
     groups.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch groups:', error);
@@ -98,12 +98,12 @@ const closeDialog = () => {
 const saveGroup = async () => {
   try {
     if (isEditing.value) {
-      await axios.patch(apiUrl + '/site/groups', {
+      await axios.patch(apiUrl + '/groups', {
         id: groupIdToEdit.value,
         ...groupData.value
       });
     } else {
-      await axios.post(apiUrl + '/site/groups', groupData.value);
+      await axios.post(apiUrl + '/groups', groupData.value);
     }
     closeDialog();
     await fetchGroups();
@@ -114,7 +114,7 @@ const saveGroup = async () => {
 
 const deleteGroup = async (id) => {
   try {
-    await axios.delete(apiUrl + `/site/groups/${id}`);
+    await axios.delete(apiUrl + `/groups/${id}`);
     await fetchGroups();
   } catch (error) {
     console.error('Failed to delete group:', error);

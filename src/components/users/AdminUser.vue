@@ -84,6 +84,7 @@
 <script setup>
 import {onMounted, ref} from 'vue';
 import axios from 'axios';
+const apiUrl = import.meta.env.VITE_API_HOST;
 
 const users = ref([]);
 const groupsList = ref([]);
@@ -97,7 +98,7 @@ const userIdToEdit = ref(null);
 
 const fetchUsers = async () => {
   try {
-    const response = await axios.get(apiUrl + `/site/users`, {params: {name: searchQuery.value}});
+    const response = await axios.get(apiUrl + `/users`, {params: {name: searchQuery.value}});
     users.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch users:', error);
@@ -106,7 +107,7 @@ const fetchUsers = async () => {
 
 const fetchGroups = async () => {
   try {
-    const response = await axios.get(apiUrl + `/site/groups`);
+    const response = await axios.get(apiUrl + `/groups`);
     groupsList.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch groups:', error);
@@ -137,12 +138,12 @@ const closeDialog = () => {
 const saveUser = async () => {
   try {
     if (isEditing.value) {
-      await axios.put(apiUrl + `/site/users`, {
+      await axios.put(apiUrl + `/users`, {
         id: userIdToEdit.value,
         ...userData.value
       });
     } else {
-      await axios.post(apiUrl + '/site/registration', userData.value);
+      await axios.post(apiUrl + '/registration', userData.value);
     }
     closeDialog();
     fetchUsers();
@@ -153,7 +154,7 @@ const saveUser = async () => {
 
 const deleteUser = async (id) => {
   try {
-    await axios.delete(apiUrl + `/site/users/${id}`);
+    await axios.delete(apiUrl + `/users/${id}`);
     fetchUsers();
   } catch (error) {
     console.error('Failed to delete user:', error);
@@ -171,7 +172,7 @@ const closePasswordDialog = () => {
 
 const changePassword = async () => {
   try {
-    await axios.put(apiUrl + `/site/users/change-password`, passwordData.value);
+    await axios.put(apiUrl + `/users/change-password`, passwordData.value);
     closePasswordDialog();
   } catch (error) {
     console.error('Failed to change password:', error);

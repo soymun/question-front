@@ -14,51 +14,58 @@
           <input type="password" id="password" v-model="password" class="form-control" required>
         </div>
         <button type="submit" class="btn btn-primary w-100">Войти</button>
+        <div class="text-center mt-3">
+          <a href="#" @click.prevent="forgotPassword">Забыли пароль?</a>
+        </div>
       </form>
 
       <!-- Alert for error message -->
-      <div v-if="errorMessage" class="alert alert-danger mt-3 fixed-bottom" role="alert" style="left: 0; right: 0; bottom: 0; margin-left: auto; margin-right: auto; width: 50%;">
-        {{ errorMessage }}
+      <div v-if="errorMessage" class="alert alert-danger mt-3 fixed-bottom text-center" role="alert" style="left: 0; right: 0; bottom: 0; margin-left: auto; margin-right: auto; width: 50%;">
+        {{errorMessage}}
       </div>
     </div>
   </div>
 </template>
 
-<script>
-import axios from "axios";
+<script setup>
+import {ref} from 'vue';
+import axios from 'axios';
 import router from "@/router.js";
-import {ref} from "vue";
+const apiUrl = import.meta.env.VITE_API_HOST;
+
+const username = ref('');
+const password = ref('');
 const errorMessage = ref('');
 
-export default {
-  name: 'Login',
-  data() {
-    return {
-      username: '',
-      password: ''
-    };
-  },
-  methods: {
-    async login() {
-      try {
-        const response = await axios.post(apiUrl + '/site/login', {
-          email: username.value,
-          password: password.value
-        });
-        localStorage.setItem('token', response.data.data.accessToken);
-        localStorage.setItem('role', response.data.data.role);
+const login = async () => {
+  try {
+    const response = await axios.post(apiUrl + '/login', {
+      email: username.value,
+      password: password.value
+    });
+    if (response.data.errors.length > 0) {
+      errorMessage.value = response.data.errors[0];
+      setTimeout(() => errorMessage.value = '', 5000); // Скрыть сообщение через 5 секунд
+    } else {
+      localStorage.setItem('token', response.data.data.accessToken);
+      localStorage.setItem('role', response.data.data.role);
 
-        if (response.data.data.role === 'ADMIN' || response.data.data.role === 'TEACHER') {
-          await router.push('teacher/courses');
-        } else {
-          await router.push('courses');
-        }
-      } catch (error) {
-        errorMessage.value = error.response ? error.response.data.errors : 'Произошла ошибка';
+      if (response.data.data.role === 'ADMIN' || response.data.data.role === 'TEACHER') {
+        await router.push('teacher/courses');
+      } else {
+        await router.push('courses');
       }
     }
+  } catch (error) {
+    errorMessage.value = error.response ? error.response.data.errors : 'Произошла ошибка';
+    setTimeout(() => errorMessage.value = '', 5000); // Скрыть сообщение через 5 секунд
   }
-};
+}
+
+const forgotPassword = () => {
+  // Здесь можно добавить логику для восстановления пароля
+  alert('Функция восстановления пароля пока не реализована.');
+}
 </script>
 
 <style scoped>

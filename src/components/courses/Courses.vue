@@ -18,7 +18,7 @@
           <div class="row g-0">
             <!-- Иконка курса -->
             <div class="col-md-4">
-              <img :src="apiUrl + `/site/file/file/jpg/${course.pathImage}`" alt="Course Image"
+              <img :src="apiUrl + `/file/file/jpg/${course.pathImage}`" alt="Course Image"
                    class="img-fluid rounded-start course-image">
             </div>
 
@@ -53,7 +53,7 @@
             <button type="button" class="btn-close" @click="close"></button>
           </div>
           <div class="modal-body">
-            <img :src="`${apiUrl}/site/file/file/jpg/${courseInfo.pathImage}`" alt="Course Image"
+            <img :src="`${apiUrl}/file/file/jpg/${courseInfo.pathImage}`" alt="Course Image"
                  class="img-fluid mb-3"/>
             <p class="text-wrap">{{ courseInfo.about.substring(0, 50) }}</p>
             <p>Создатель: {{ courseInfo.userCreated.firstName }} {{ courseInfo.userCreated.secondName }}</p>
@@ -84,7 +84,7 @@ const apiUrl = import.meta.env.VITE_API_HOST;
 // Функция для загрузки курсов
 const fetchCourses = async (query = '') => {
   try {
-    const response = await axios.post(apiUrl + '/site/courses/search', {query});
+    const response = await axios.post(apiUrl + '/courses/search', {query});
     courses.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch courses:', error);
@@ -110,7 +110,7 @@ const close = () => {
 const getCourseById = async (course) => {
   try {
     courseInfo.value = course;
-    const response = await axios.get(apiUrl + `/site/user/courses/course/${course.id}`);
+    const response = await axios.get(apiUrl + `/user/courses/course/${course.id}`);
     await router.push(`/courses/${course.id}`);
   } catch (error) {
     showDialog.value = true; // Открываем диалог
@@ -131,7 +131,7 @@ const leaveCourse = (id) => {
 // Начало курса
 const startCourse = async (id) => {
   try {
-    await axios.post(apiUrl + `/site/user/courses/course/add/${id}`);
+    await axios.post(apiUrl + `/user/courses/course/add/${id}`);
     await router.push(`/courses/${id}`);
   } catch (error) {
     console.error('Failed to start course:', error);

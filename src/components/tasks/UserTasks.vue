@@ -52,7 +52,7 @@ const apiUrl = import.meta.env.VITE_API_HOST;
 
 const fetchTasks = async (courseId) => {
   try {
-    const response = await axios.get(apiUrl + `/site/task/search/user/course/${courseId}`);
+    const response = await axios.get(apiUrl + `/task/search/user/course/${courseId}`);
     tasks.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch tasks:', error);

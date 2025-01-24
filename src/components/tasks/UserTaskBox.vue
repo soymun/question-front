@@ -89,7 +89,7 @@ const goBack = () => {
 // Fetch task information
 const fetchTaskInfo = async (taskId) => {
   try {
-    const response = await axios.get(apiUrl + `/site/task/user/get/${taskId}`);
+    const response = await axios.get(apiUrl + `/task/${taskId}`);
     taskInfo.value = response.data.data;
     isTaskCompleted.value = taskInfo.value.completed; // Check if the task is already completed
   } catch (error) {
@@ -106,7 +106,7 @@ const formatDate = (dateString) => {
 // Fetch comments
 const fetchComments = async (taskId) => {
   try {
-    const response = await axios.get(apiUrl + `/site/comments/task/${taskId}`);
+    const response = await axios.get(apiUrl + `/comments/user/task/${taskId}`);
     comments.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch comments:', error);
@@ -121,7 +121,7 @@ const submitComment = async () => {
   }
 
   try {
-    await axios.post(apiUrl + '/site/comments', {task: taskInfo.value.id, message: newComment.value});
+    await axios.post(apiUrl + '/comments', {task: taskInfo.value.id, message: newComment.value});
     newComment.value = '';
     await fetchComments(taskInfo.value.id);
   } catch (error) {
@@ -132,7 +132,7 @@ const submitComment = async () => {
 // Submit the task
 const submitTask = async () => {
   try {
-    const response = await axios.post(apiUrl + '/site/task/execute', {
+    const response = await axios.post(apiUrl + '/task/execute', {
       taskId: taskInfo.value.id,
       executeBoxDto: {resultIds: selectedBoxes.value},
     });

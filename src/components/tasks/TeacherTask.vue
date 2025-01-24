@@ -357,7 +357,7 @@ const closeAddMarkModal = () => {
 
 const searchUsers = async () => {
   try {
-    const response = await axios.get(apiUrl + `/site/users?name=${userName.value}`);
+    const response = await axios.get(apiUrl + `/users?name=${userName.value}`);
     usersList.value = response.data.data; // Возвращаем список найденных пользователей
   } catch (error) {
     console.error('Failed to search users:', error);
@@ -366,7 +366,7 @@ const searchUsers = async () => {
 
 const searchGroups = async () => {
   try {
-    const response = await axios.get(apiUrl + `/site/groups/name/${groupName.value}`);
+    const response = await axios.get(apiUrl + `/groups/name/${groupName.value}`);
     groupsList.value = response.data.data; // Возвращаем список найденных групп
   } catch (error) {
     console.error('Failed to search groups:', error);
@@ -374,20 +374,22 @@ const searchGroups = async () => {
 };
 
 const addGroupToCourse = async () => {
-  await axios.post(apiUrl + `/site/user/courses/course/${route.params.id}/group/${groupId.value}`);
+  await axios.post(apiUrl + `/user/courses/course/${route.params.id}/group/${groupId.value}`);
   await fetchGroups(route.params.id);
+  await toggleUsers(prevId.value)
   closeAddGroupModal()
 };
 
 const addUserToCourse = async () => {
-  await axios.post(apiUrl + `/site/user/courses/course/${userId.value}/add/${route.params.id}`);
+  await axios.post(apiUrl + `/user/courses/course/${userId.value}/add/${route.params.id}`);
   await fetchGroups(route.params.id);
+  await toggleUsers(prevId.value)
   closeAddUserModal();
 };
 
 const createTask = async () => {
   try {
-    const response = await axios.post(apiUrl + `/site/task`, newTask.value);
+    const response = await axios.post(apiUrl + `/task`, newTask.value);
     newTask.value = {
       number: 0,
       name: '',
@@ -423,6 +425,9 @@ const openEditPanelTask = (task) => {
     case 'QUESTION_BOX_MULTI':
       router.push(`/teacher/courses/${route.params.id}/task/box/${task.id}`);
       break;
+    case 'QUESTION_BOX_ONE':
+      router.push(`/teacher/courses/${route.params.id}/task/box/${task.id}`);
+      break;
     case 'CODE':
       router.push(`/teacher/courses/${route.params.id}/task/code/${task.id}`);
       break;
@@ -433,7 +438,7 @@ const openEditPanelTask = (task) => {
 
 const addMark = async () => {
   try {
-    await axios.post(apiUrl + `/site/course/marks`, newMark.value);
+    await axios.post(apiUrl + `/course/marks`, newMark.value);
     newMark.value = {courses: route.params.id, countTask: 0, mark: 0}; // Reset the new mark
     isModalVisible.value = false;
     await fetchMarks(route.params.id)
@@ -444,7 +449,7 @@ const addMark = async () => {
 
 const deleteMark = async (markId) => {
   try {
-    const response = await axios.delete(apiUrl + `/site/course/marks/${markId}`);
+    const response = await axios.delete(apiUrl + `/course/marks/${markId}`);
     await fetchMarks(route.params.id);
     if (response.status === 200) {
       console.log(`Mark with ID ${markId} has been deleted.`);
@@ -459,13 +464,8 @@ const deleteMark = async (markId) => {
 
 const excludeUser = async (userId) => {
   try {
-    const response = await axios.delete(apiUrl + `/site/user/courses/user/${userId}/course/${route.params.id}`);
-
-    if (response.status === 200) {
-      console.log(`User with ID ${userId} has been excluded from course ${route.params.id}.`);
-    } else {
-      console.error('Failed to exclude user from course');
-    }
+    const response = await axios.delete(apiUrl + `/user/courses/user/${userId}/course/${route.params.id}`);
+    await toggleUsers(prevId.value)
   } catch (error) {
     console.error('Error:', error);
   }
@@ -473,13 +473,8 @@ const excludeUser = async (userId) => {
 
 const excludeGroup = async (groupId) => {
   try {
-    const response = await axios.delete(apiUrl + `/site/user/courses/course/${route.params.id}/group/${groupId}`);
-
-    if (response.status === 200) {
-      console.log(`Group with ID ${groupId} has been excluded from course ${route.params.id}.`);
-    } else {
-      console.error('Failed to exclude group from course');
-    }
+    const response = await axios.delete(apiUrl + `/user/courses/course/${route.params.id}/group/${groupId}`);
+    await fetchGroups(route.params.id);
   } catch (error) {
     console.error('Error:', error);
   }
@@ -488,13 +483,8 @@ const excludeGroup = async (groupId) => {
 
 const deleteTask = async (taskId) => {
   try {
-    const response = await axios.delete(apiUrl + `/site/task/${taskId}`);
+    const response = await axios.delete(apiUrl + `/task/${taskId}`);
     await fetchTasks(route.params.id);
-    if (response.status === 200) {
-      console.log(`Task with ID ${taskId} has been deleted.`);
-    } else {
-      console.error('Failed to delete task');
-    }
   } catch (error) {
     console.error('Error:', error);
   }
@@ -508,7 +498,7 @@ const closeModalSql = () => {
 // Fetch course info
 const fetchCourse = async (courseId) => {
   try {
-    const response = await axios.get(apiUrl + `/site/courses/${courseId}`);
+    const response = await axios.get(apiUrl + `/courses/${courseId}`);
     course.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch course:', error);
@@ -518,7 +508,7 @@ const fetchCourse = async (courseId) => {
 // Fetch tasks for the course
 const fetchTasks = async (courseId) => {
   try {
-    const response = await axios.get(apiUrl + `/site/task/user/course/${courseId}`);
+    const response = await axios.get(apiUrl + `/task/search/user/course/${courseId}`);
     tasks.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch tasks:', error);
@@ -532,7 +522,7 @@ const getMark = (mark) => {
 // Fetch groups for the course
 const fetchGroups = async (courseId) => {
   try {
-    const response = await axios.get(apiUrl + `/site/groups/course/${courseId}`);
+    const response = await axios.get(apiUrl + `/groups/course/${courseId}`);
     groups.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch groups:', error);
@@ -542,7 +532,7 @@ const fetchGroups = async (courseId) => {
 // Fetch marks for the course
 const fetchMarks = async (courseId) => {
   try {
-    const response = await axios.get(apiUrl + `/site/course/marks/course/${courseId}`);
+    const response = await axios.get(apiUrl + `/course/marks/course/${courseId}`);
     marks.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch marks:', error);
@@ -551,13 +541,14 @@ const fetchMarks = async (courseId) => {
 
 // Method to toggle user list visibility
 const toggleUsers = async (groupId) => {
+  if (groupId == null) return;
   if (open.value && prevId.value === groupId) {
     console.log(false)
     open.value = false; // Clear users if they are already shown
     return;
   }
   try {
-    const response = await axios.get(apiUrl + `/site/user/courses/course/${route.params.id}/group/${groupId}`);
+    const response = await axios.get(apiUrl + `/user/courses/course/${route.params.id}/group/${groupId}`);
     users.value = response.data.data;
     open.value = true;
     prevId.value = groupId;
@@ -568,7 +559,7 @@ const toggleUsers = async (groupId) => {
 
 const executeTask = async () => {
   try {
-    const response = await axios.post(apiUrl + '/site/courses/execute', {
+    const response = await axios.post(apiUrl + '/courses/execute', {
       courseId: route.params.id,
       userSql: userSql.value,
     });
