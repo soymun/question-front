@@ -9,12 +9,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@codemirror/lang-java": "^6.0.1",
+    "@codemirror/lang-javascript": "^6.2.2",
+    "@codemirror/lang-sql": "^6.8.0",
+    "@codemirror/theme-one-dark": "^6.1.2",
     "@popperjs/core": "^2.11.8",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
     "bootstrap-icons": "^1.11.3",
-    "codemirror": "^5.65.18",
+    "codemirror": "^6.0.1",
     "vue": "^3.5.9",
+    "vue-codemirror": "^6.1.1",
     "vue-router": "^4.4.3"
   },
   "devDependencies": {

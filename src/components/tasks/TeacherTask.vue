@@ -238,7 +238,7 @@
 
     <div v-if="activeTab === 'settings' && course.schema" class="h-75">
       <h4>SQL настройка</h4>
-      <textarea v-model="userSql" class="form-control h-75" style="resize: none" placeholder="Введите SQL"></textarea>
+      <textarea v-model="userSql" class="form-control h-75" style="resize: none; min-height: 65vh" placeholder="Введите SQL"></textarea>
       <div class="d-flex justify-content-end">
         <button @click="executeTask" class="btn btn-success mt-2 w-25">Выполнить</button>
       </div>

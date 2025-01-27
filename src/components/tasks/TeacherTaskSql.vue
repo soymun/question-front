@@ -190,7 +190,6 @@ const fetchTaskData = async () => {
 
   if (task.value.taskInfoSql == null){
     task.value.taskInfoSql = {
-      id: 0,
       checkSql: '',
       mainSql: ''
     };

@@ -35,15 +35,6 @@
 
     <!-- Содержимое вкладки "Задача" -->
     <div v-if="activeTab === 'task'" class="row mt-4" style="height: 90%">
-      <div class="col-md-6">
-        <h5>{{taskInfo.name}}</h5>
-        <p v-html="taskInfo.description"></p>
-      </div>
-
-      <!-- Разделитель -->
-      <div class="col-md-1 d-flex justify-content-center align-items-center">
-        <div style="border-left: 1px solid #ccc; height: 100%;"></div>
-      </div>
 
       <div class="col-md-5" style="height: 100%;">
         <div class="mb-3">
@@ -56,19 +47,33 @@
         </div>
 
         <!-- Поле ввода кода -->
-        <textarea
+        <codemirror
             v-model="userCode"
-            class="form-control mb-3"
-            rows="10"
-            placeholder="Введите код"
+            placeholder="Code goes here..."
+            :style="{ height: '400px' }"
+            :autofocus="true"
+            :indent-with-tab="true"
+            :tab-size="2"
+            :extensions="extensions"
+            @ready="handleReady"
             style="min-height: 65vh"
-        ></textarea>
+        />
 
         <!-- Кнопка "Сдать" -->
         <div class="d-flex">
           <button class="btn btn-success" style="width: 100%" @click="submitTask">Сдать</button>
         </div>
       </div>
+      <!-- Разделитель -->
+      <div class="col-md-1 d-flex justify-content-center align-items-center">
+        <div style="border-left: 1px solid #ccc; height: 100%;"></div>
+      </div>
+
+      <div class="col-md-6">
+        <h5>{{taskInfo.name}}</h5>
+        <p v-html="taskInfo.description"></p>
+      </div>
+
     </div>
 
     <!-- Попытки -->
@@ -133,19 +138,13 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import {onMounted, ref, shallowRef} from 'vue';
 import axios from 'axios';
 import { useRoute, useRouter } from 'vue-router';
-import CodeMirror from 'codemirror';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/dracula.css';
-import 'codemirror/mode/clike/clike'; // Для Java, C, C++
-import 'codemirror/mode/python/python'; // Для Python
-import 'codemirror/mode/javascript/javascript'; // Для JavaScript
-import 'codemirror/mode/sql/sql'; // Для SQL
-import 'codemirror/mode/htmlmixed/htmlmixed'; // Для HTML
-import 'codemirror/mode/css/css'; // Для CSS
-import 'codemirror/mode/xml/xml'; // Для XML
+import { Codemirror } from 'vue-codemirror';
+import { oneDark } from '@codemirror/theme-one-dark'
+import { javascript } from '@codemirror/lang-javascript'
+import { java } from '@codemirror/lang-java'
 
 const router = useRouter();
 const route = useRoute();
@@ -159,32 +158,23 @@ const isModalVisible = ref(false);
 const comments = ref([]);
 const newComment = ref('');
 const selectedLanguage = ref({});
-let codeMirrorInstance = null;
 const apiUrl = import.meta.env.VITE_API_HOST;
 
-// Карта режимов для языков
-const languageModes = {
-  java: 'text/x-java',
-  python: 'text/x-python',
-  javascript: 'text/javascript',
-  sql: 'text/x-sql',
-  html: 'text/html',
-  css: 'text/css',
-  xml: 'application/xml',
-  c: 'text/x-csrc',
-  cpp: 'text/x-c++src',
-};
+const view = shallowRef()
+const handleReady = (payload) => {
+  view.value = payload.view
+}
+
+const extensions = [javascript(), java(), oneDark];
 
 const goBack = () => {
   router.push(`/courses/${route.params.cId}`);
 };
 
-// Функция для загрузки данных задачи
 const fetchTaskInfo = async (taskId) => {
   try {
     const response = await axios.get(apiUrl + `/task/${taskId}`);
     taskInfo.value = response.data.data;
-    // Инициализация кода в текстовое поле
     if (taskInfo.value.taskInfoCode.length > 0) {
       selectedLanguage.value = taskInfo.value.taskInfoCode[0];
       userCode.value = selectedLanguage.value.initCode;
@@ -193,29 +183,6 @@ const fetchTaskInfo = async (taskId) => {
     console.error('Failed to fetch task info:', error);
   }
 };
-
-// Следим за изменением выбранного языка, чтобы обновить код
-watch(selectedLanguage, (newCode) => {
-  userCode.value = newCode.initCode;
-  if (codeMirrorInstance) {
-    codeMirrorInstance.setValue(userCode.value); // Синхронизация с CodeMirror
-  }
-});
-
-const changeLanguageMode = (language) => {
-  if (codeMirrorInstance && languageModes[language]) {
-    codeMirrorInstance.setOption('mode', languageModes[language]);
-    codeMirrorInstance.refresh(); // Перерисовываем редактор
-  }
-};
-
-// Отслеживание изменения выбранного языка
-watch(selectedLanguage, (newLanguage) => {
-  if (newLanguage && newLanguage.codeType && newLanguage.codeType.name) {
-    const language = newLanguage.codeType.name.toLowerCase(); // Приводим к нижнему регистру
-    changeLanguageMode(language);
-  }
-});
 
 const formatDate = (dateString) => {
   const options = {
@@ -229,7 +196,6 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('ru-RU', options).replace(',', '');
 };
 
-// Отправка задачи
 const submitTask = async () => {
   try {
     await axios.post(apiUrl + '/task/execute', {
@@ -248,7 +214,6 @@ const submitTask = async () => {
   }
 };
 
-// Получение комментариев
 const fetchComments = async (taskId) => {
   try {
     const response = await axios.get(apiUrl + `/comments/user/task/${taskId}`);
@@ -258,7 +223,6 @@ const fetchComments = async (taskId) => {
   }
 };
 
-// Отправка комментария
 const submitComment = async () => {
   if (!newComment.value.trim()) {
     alert('Комментарий не может быть пустым!');
@@ -271,7 +235,6 @@ const submitComment = async () => {
       message: newComment.value,
     });
 
-    // После успешной отправки, очищаем поле и обновляем список комментариев
     newComment.value = '';
     fetchComments(taskInfo.value.id);
   } catch (error) {
@@ -279,7 +242,6 @@ const submitComment = async () => {
   }
 };
 
-// Получение попыток выполнения задачи
 const fetchAttempts = async (taskId) => {
   try {
     const response = await axios.get(apiUrl + `/task/history/task/user/${taskId}`);
@@ -289,9 +251,12 @@ const fetchAttempts = async (taskId) => {
   }
 };
 
-// Закрытие модального окна
 const closeModal = () => {
   isModalVisible.value = false;
+};
+
+const onCodeChange = (newCode) => {
+  userCode.value = newCode;
 };
 
 onMounted(() => {
@@ -299,30 +264,12 @@ onMounted(() => {
   fetchTaskInfo(taskId);
   fetchAttempts(taskId);
   fetchComments(taskId);
-
-  const textarea = document.querySelector('.form-control.mb-3');
-
-  codeMirrorInstance = CodeMirror.fromTextArea(textarea, {
-    mode: 'text/x-java', // Начальный режим для Java
-    theme: 'dracula',
-    lineNumbers: true,
-    extraKeys: {
-      'Ctrl-Space': 'autocomplete',
-    },
-  });
-
-  codeMirrorInstance.on('change', (instance) => {
-    userCode.value = instance.getValue();
-  });
-
-  codeMirrorInstance.setSize(null, '70vh');
 });
 
 const showSql = (sqlCode) => {
   currentSql.value = sqlCode;
   isModalVisible.value = true;
 };
-
 </script>
 
 <style scoped>

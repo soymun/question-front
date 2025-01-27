@@ -36,25 +36,19 @@
 
     <!-- Содержимое вкладок -->
     <div v-if="activeTab === 'task'" class="row mt-4" style="min-height: 75vh">
-      <div class="col-md-6">
-        <h5>{{taskInfo.name}}</h5>
-        <p v-html="taskInfo.description"></p>
-      </div>
-
-      <!-- Разделитель -->
-      <div class="col-md-1 d-flex justify-content-center align-items-center">
-        <div style="border-left: 1px solid #ccc; height: 100%;"></div>
-      </div>
 
       <div class="col-md-5" style="min-height: 75vh;">
-        <textarea
-            v-if="activeTab === 'task'"
+        <!-- Заменяем textarea на codemirror -->
+        <codemirror
             v-model="userSql"
-            class="form-control mb-3"
-            rows="10"
             placeholder="Введите SQL запрос"
-            style="resize: none"
-        ></textarea>
+            :autofocus="true"
+            :indent-with-tab="true"
+            :tab-size="2"
+            :extensions="extensions"
+            @ready="handleReady"
+            style="min-height: 75vh"
+        />
 
         <!-- Кнопки в одну линию -->
         <div class="d-flex">
@@ -99,6 +93,15 @@
             </div>
           </div>
         </div>
+      </div>
+
+      <div class="col-md-1 d-flex justify-content-center align-items-center">
+        <div style="border-left: 1px solid #ccc; height: 100%;"></div>
+      </div>
+
+      <div class="col-md-6">
+        <h5>{{taskInfo.name}}</h5>
+        <p v-html="taskInfo.description"></p>
       </div>
     </div>
 
@@ -163,16 +166,13 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import {onMounted, ref, shallowRef} from 'vue';
 import axios from 'axios';
-import { useRoute, useRouter } from 'vue-router';
-import CodeMirror from 'codemirror';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/dracula.css';
-import 'codemirror/mode/sql/sql';
-import 'codemirror/addon/hint/sql-hint';
-import 'codemirror/addon/hint/show-hint.css';
-import 'codemirror/addon/hint/show-hint';
+import {useRoute, useRouter} from 'vue-router';
+import {Codemirror} from 'vue-codemirror';
+import {sql} from '@codemirror/lang-sql';
+import {oneDark} from '@codemirror/theme-one-dark';
+
 const apiUrl = import.meta.env.VITE_API_HOST;
 
 const router = useRouter();
@@ -188,31 +188,19 @@ const isModalVisible = ref(false);
 const isModalVisibleSql = ref(false);
 const comments = ref([]);
 const newComment = ref('');
-let textarea = null;
+
+const view = shallowRef();
+const handleReady = (payload) => {
+  view.value = payload.view;
+};
+
+const extensions = [sql(), oneDark];
 
 onMounted(() => {
   const taskId = route.params.id;
   fetchTaskInfo(taskId);
   fetchComments(taskId);
   fetchAttempts(taskId);
-
-  textarea = document.querySelector('.form-control.mb-3');
-
-  const codeMirrorInstance = CodeMirror.fromTextArea(textarea, {
-    mode: 'text/x-sql',
-    theme: 'dracula',
-    lineNumbers: true,
-    extraKeys: {
-      'Ctrl-Space': 'autocomplete',
-    },
-  });
-
-  codeMirrorInstance.on('change', (instance) => {
-    userSql.value = instance.getValue();
-  });
-
-  codeMirrorInstance.setSize(null, '75vh');
-
 });
 
 const goBack = () => {
@@ -354,5 +342,4 @@ const showSql = (sql) => {
   transition: transform 0.2s;
   cursor: pointer;
 }
-
 </style>
