@@ -20,21 +20,21 @@
 
     <!-- Task Tab -->
     <div v-if="activeTab === 'task'" class="d-flex flex-column align-items-center">
-
+      <!-- Task Title -->
+      <h1 class="w-100 text-center text-wrap mb-4">{{ taskInfo.name }}</h1>
       <!-- Google Forms-like Answer Section -->
       <div class="card mt-4" style="width: 60%;">
         <div class="task-section mt-3 text-wrap text-start w-100">
-          <h1 class="w-100 text-center text-wrap">{{taskInfo.name}}</h1>
           <p v-html="taskInfo.description" class="m-5"></p>
         </div>
         <div class="card-body">
-
           <div v-for="(box) in taskInfo.taskInfoQuestionBox" :key="box.id"
                class="form-check form-check-button mb-3 w-100">
             <input type="checkbox" class="form-check-input" :id="'box-' + box.id" :value="box.id"
                    v-model="selectedBoxes"/>
-            <label class="form-check-label btn btn-outline-secondary w-100 text-start text-wrap"
+            <label class="form-check-label btn border-0 w-100 text-start text-wrap"
                    :class="{ active: selectedBoxes.includes(box.id) }" :for="'box-' + box.id">
+              <span class="checkbox-custom"></span>
               {{ box.answer }}
             </label>
           </div>
@@ -167,18 +167,34 @@ textarea.form-control {
 }
 
 .form-check-button input[type="checkbox"] {
-  display: none;
-}
-
-.form-check-button label {
-  display: inline-block;
-  padding: 10px 20px;
-  cursor: pointer;
+  opacity: 0;
+  position: absolute;
 }
 
 .form-check-button label.active {
-  background-color: gray;
-  color: white;
-  border-color: gray;
+  border: none;
+}
+
+.checkbox-custom {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid black;
+  border-radius: 4px;
+  margin-right: 10px;
+  vertical-align: middle;
+  position: relative;
+}
+
+.form-check-button input[type="checkbox"]:checked + label .checkbox-custom::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  background-color: #198754;
+  border-radius: 2px;
+  transform: translate(-50%, -50%);
 }
 </style>

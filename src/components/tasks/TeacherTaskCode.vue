@@ -69,7 +69,6 @@
     </div>
 
     <!-- Additional Panel (Дополнительные) -->
-    <!-- Additional Panel (Дополнительные) -->
     <div v-if="activeTab === 'additional'">
       <!-- Кнопка для добавления нового типа кода -->
       <button class="btn btn-outline-primary mb-3" @click="openAddDialog">Добавить</button>
@@ -91,7 +90,18 @@
 
               <div class="form-group">
                 <label for="initCode">Начальный код</label>
-                <textarea v-model="code.initCode" class="form-control" id="initCode" rows="17" style="resize: none"></textarea>
+                <!-- Заменяем textarea на codemirror -->
+                <codemirror
+                    v-model="code.initCode"
+                    placeholder="Введите начальный код"
+                    :style="{ height: '400px' }"
+                    :autofocus="true"
+                    :indent-with-tab="true"
+                    :tab-size="2"
+                    :extensions="extensions"
+                    @ready="handleReady"
+                    style="min-height: 65vh"
+                />
               </div>
             </div>
 
@@ -103,7 +113,18 @@
 
               <div class="form-group">
                 <label for="checkCode">Проверяющий код</label>
-                <textarea v-model="code.checkCode" class="form-control" id="checkCode" rows="17" style="resize: none"></textarea>
+                <!-- Заменяем textarea на codemirror -->
+                <codemirror
+                    v-model="code.checkCode"
+                    placeholder="Введите проверяющий код"
+                    :style="{ height: '400px' }"
+                    :autofocus="true"
+                    :indent-with-tab="true"
+                    :tab-size="2"
+                    :extensions="extensions"
+                    @ready="handleReady"
+                    style="min-height: 65vh"
+                />
               </div>
             </div>
           </div>
@@ -112,13 +133,16 @@
 
       <!-- Модальное окно для добавления нового типа кода -->
       <div v-if="isAddDialogVisible" class="modal-overlay">
-        <div class="modal-content">
-          <h5>Добавить тип кода</h5>
+        <div class="modal-content w-25">
+          <div class="modal-header">
+            <h5>Добавить тип кода</h5>
+            <div style="flex: 1"/>
+            <button type="button" class="btn-close" @click="closeAddDialog"></button>
+          </div>
           <select v-model="newCodeTypeId" class="form-control mb-3">
             <option v-for="type in codeTypes" :value="type.id" :key="type.id">{{ type.name }}</option>
           </select>
           <button class="btn btn-primary" @click="addCodeType">Добавить</button>
-          <button class="btn btn-secondary" @click="closeAddDialog">Закрыть</button>
         </div>
       </div>
 
@@ -192,8 +216,11 @@
 
 <script setup>
 import axios from 'axios';
-import {onMounted, ref} from "vue";
-import {useRoute, useRouter} from "vue-router";
+import { onMounted, ref, shallowRef } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { Codemirror } from 'vue-codemirror';
+import { java } from '@codemirror/lang-java'; // Или другой язык, например, javascript
+import { oneDark } from '@codemirror/theme-one-dark';
 
 const route = useRoute();
 const router = useRouter();
@@ -217,6 +244,13 @@ const selectedCodeIndex = ref(null);  // Индекс выбранного ти�
 const isAddDialogVisible = ref(false); // Видимость модального окна добавления
 const newCodeTypeId = ref(null);  // Выбранный тип кода для добавления
 const apiUrl = import.meta.env.VITE_API_HOST;
+
+const view = shallowRef();
+const handleReady = (payload) => {
+  view.value = payload.view;
+};
+
+const extensions = [java(), oneDark]; // Настройка для Java (или другого языка)
 
 const openAddDialog = async () => {
   // Получение типов кода с сервера
@@ -255,7 +289,7 @@ const addCodeType = () => {
 
 // Выбор типа кода для редактирования
 const selectCodeType = (index) => {
-  if (selectedCodeIndex.value === index){
+  if (selectedCodeIndex.value === index) {
     selectedCodeIndex.value = null;
   } else {
     selectedCodeIndex.value = index;
@@ -308,11 +342,11 @@ const saveTask = async () => {
 };
 
 const fetchComments = async () => {
-  const response = await axios.get(apiUrl + `/comments/teacher/task/${route.params.taskId}`)
+  const response = await axios.get(apiUrl + `/comments/teacher/task/${route.params.taskId}`);
   comments.value = response.data.data;
 };
 const deleteComment = async (commentId) => {
-  await axios.delete(apiUrl + `/comments/${commentId}`)
+  await axios.delete(apiUrl + `/comments/${commentId}`);
   await fetchComments();
 };
 const applyComment = async (commentId) => {
@@ -342,8 +376,7 @@ onMounted(async () => {
   await fetchTaskData();
   await fetchAttempts();
   await fetchComments();
-})
-
+});
 </script>
 
 <style scoped>

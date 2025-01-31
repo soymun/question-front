@@ -18,6 +18,7 @@ import TeacherTaskBox from "@/components/tasks/TeacherTaskBox.vue";
 import TeacherTaskCode from "@/components/tasks/TeacherTaskCode.vue";
 import AdminGroups from "@/components/groups/AdminGroups.vue";
 import AdminUser from "@/components/users/AdminUser.vue";
+import Sandbox from "@/components/sandbox/Sandbox.vue";
 
 const routes = [
     {
@@ -114,6 +115,11 @@ const routes = [
         path: '/admin/users',
         name: 'AdminUsers',
         component: AdminUser
+    },
+    {
+        path: '/sandbox',
+        name: 'Sandbox',
+        component: Sandbox
     },
 ];
 

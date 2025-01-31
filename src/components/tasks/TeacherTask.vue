@@ -238,7 +238,18 @@
 
     <div v-if="activeTab === 'settings' && course.schema" class="h-75">
       <h4>SQL настройка</h4>
-      <textarea v-model="userSql" class="form-control h-75" style="resize: none; min-height: 65vh" placeholder="Введите SQL"></textarea>
+      <!-- Заменяем textarea на codemirror -->
+      <codemirror
+          v-model="userSql"
+          placeholder="Введите SQL"
+          :style="{ height: '400px' }"
+          :autofocus="true"
+          :indent-with-tab="true"
+          :tab-size="2"
+          :extensions="extensions"
+          @ready="handleReady"
+          style="min-height: 65vh"
+      />
       <div class="d-flex justify-content-end">
         <button @click="executeTask" class="btn btn-success mt-2 w-25">Выполнить</button>
       </div>
@@ -283,10 +294,13 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from 'vue';
+import { onMounted, ref, shallowRef } from 'vue';
 import axios from 'axios';
-import {useRoute} from 'vue-router';
+import { useRoute } from 'vue-router';
 import router from "@/router.js";
+import { Codemirror } from 'vue-codemirror';
+import { sql } from '@codemirror/lang-sql';
+import { oneDark } from '@codemirror/theme-one-dark';
 
 const route = useRoute();
 const isModalVisible = ref(false);
@@ -326,6 +340,13 @@ const groupsList = ref([]);
 const userId = ref(0);
 const groupId = ref(0);
 const apiUrl = import.meta.env.VITE_API_HOST;
+
+const view = shallowRef();
+const handleReady = (payload) => {
+  view.value = payload.view;
+};
+
+const extensions = [sql(), oneDark];
 
 const openCreateTaskModal = () => {
   isCreateTaskModalVisible.value = true;
@@ -559,7 +580,7 @@ const toggleUsers = async (groupId) => {
 
 const executeTask = async () => {
   try {
-    const response = await axios.post(apiUrl + '/courses/execute', {
+    const response = await axios.post(apiUrl + '/courses/task/execute', {
       courseId: route.params.id,
       userSql: userSql.value,
     });

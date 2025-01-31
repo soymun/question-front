@@ -73,11 +73,33 @@
       <div class="form-group row">
         <div class="col-md-6">
           <label for="mainSql">Выполняющий SQL</label>
-          <textarea v-model="task.taskInfoSql.mainSql" class="form-control" id="mainSql" rows="24" style="resize: none"></textarea>
+          <!-- Заменяем textarea на codemirror -->
+          <codemirror
+              v-model="task.taskInfoSql.mainSql"
+              placeholder="Введите SQL запрос"
+              :style="{ height: '400px' }"
+              :autofocus="true"
+              :indent-with-tab="true"
+              :tab-size="2"
+              :extensions="extensions"
+              @ready="handleReady"
+              style="min-height: 65vh"
+          />
         </div>
         <div class="col-md-6">
           <label for="checkSql">Проверяющий SQL</label>
-          <textarea v-model="task.taskInfoSql.checkSql" class="form-control" id="checkSql" rows="24" style="resize: none"></textarea>
+          <!-- Заменяем textarea на codemirror -->
+          <codemirror
+              v-model="task.taskInfoSql.checkSql"
+              placeholder="Введите SQL запрос"
+              :style="{ height: '400px' }"
+              :autofocus="true"
+              :indent-with-tab="true"
+              :tab-size="2"
+              :extensions="extensions"
+              @ready="handleReady"
+              style="min-height: 65vh"
+          />
         </div>
       </div>
 
@@ -151,8 +173,11 @@
 
 <script setup>
 import axios from 'axios';
-import {onMounted, ref} from "vue";
-import {useRoute, useRouter} from "vue-router";
+import { onMounted, ref, shallowRef } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { Codemirror } from 'vue-codemirror';
+import { sql } from '@codemirror/lang-sql';
+import { oneDark } from '@codemirror/theme-one-dark';
 
 const route = useRoute();
 const router = useRouter();
@@ -177,6 +202,13 @@ const isModalVisible = ref(false);
 const isModalVisibleSql = ref(false);
 const apiUrl = import.meta.env.VITE_API_HOST;
 
+const view = shallowRef();
+const handleReady = (payload) => {
+  view.value = payload.view;
+};
+
+const extensions = [sql(), oneDark];
+
 const closeModal = () => {
   isModalVisible.value = false;
 };
@@ -188,7 +220,7 @@ const fetchTaskData = async () => {
   const response = await axios.get(apiUrl + `/task/teacher/${route.params.taskId}`);
   task.value = response.data.data;
 
-  if (task.value.taskInfoSql == null){
+  if (task.value.taskInfoSql == null) {
     task.value.taskInfoSql = {
       checkSql: '',
       mainSql: ''
@@ -227,11 +259,11 @@ const saveTask = async () => {
 };
 
 const fetchComments = async () => {
-  const response = await axios.get(apiUrl + `/comments/teacher/task/${route.params.taskId}`)
+  const response = await axios.get(apiUrl + `/comments/teacher/task/${route.params.taskId}`);
   comments.value = response.data.data;
 };
 const deleteComment = async (commentId) => {
-  await axios.delete(apiUrl + `/comments/${commentId}`)
+  await axios.delete(apiUrl + `/comments/${commentId}`);
   await fetchComments();
 };
 const applyComment = async (commentId) => {
@@ -261,8 +293,7 @@ onMounted(async () => {
   await fetchTaskData();
   await fetchAttempts();
   await fetchComments();
-})
-
+});
 </script>
 
 <style scoped>

@@ -14,6 +14,9 @@
           <li class="nav-item" v-if="user()">
             <router-link class="nav-link" to="/user/courses">Моё обучение</router-link>
           </li>
+          <li class="nav-item" v-if="userSandbox()">
+            <router-link class="nav-link" to="/sandbox">Песочница</router-link>
+          </li>
           <li class="nav-item" v-if="teacher()">
             <router-link class="nav-link" to="/teacher/courses">Преподавание</router-link>
           </li>
@@ -113,6 +116,17 @@ const teacher = () => {
 
 const user = () => {
   return localStorage.getItem('role') === 'USER';
+}
+
+const userSandbox = async () => {
+  if (localStorage.getItem('role') === 'ADMIN') {
+    return true;
+  }
+
+  if (localStorage.getItem('role') === 'USER' || localStorage.getItem('role') === 'TEACHER') {
+    const response = await axios.get(apiUrl + "/sandbox/open");
+    return response.data.data.open;
+  }
 }
 
 

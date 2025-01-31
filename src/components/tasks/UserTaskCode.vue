@@ -38,8 +38,7 @@
 
       <div class="col-md-5" style="height: 100%;">
         <div class="mb-3">
-          <label for="languageSelect" class="form-label">Выберите язык</label>
-          <select id="languageSelect" v-model="selectedLanguage" class="form-select">
+          <select v-model="selectedLanguage" class="form-select w-25">
             <option v-for="codeType in taskInfo.taskInfoCode" :key="codeType.id" :value="codeType">
               {{ codeType.codeType.name }}
             </option>
