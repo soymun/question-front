@@ -3,6 +3,8 @@ import App from './App.vue'
 import router from "@/router.js";
 import axios from "axios";
 
+import '@rafaeljunioxavier/vue-quill-fix/dist/vue-quill.snow.css';
+import '@rafaeljunioxavier/vue-quill-fix/dist/vue-quill.bubble.css';
 import "bootstrap/dist/css/bootstrap.min.css"
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import "bootstrap"

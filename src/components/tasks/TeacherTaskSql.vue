@@ -60,8 +60,7 @@
       </div>
       <div class="form-group">
         <label for="additionalDescription">Описание</label>
-        <textarea v-model="task.description" class="form-control mb-1" id="additionalDescription" rows="10"
-                  style="resize: none"></textarea>
+        <QuillEditor content-type="html"  v-model:content="task.description" toolbar="full" style="resize: none; min-height: 40vh"/>
       </div>
       <div class="w-100 d-flex justify-content-end">
         <button class="btn btn-success w-25" @click="saveTask">Сохранить</button>
@@ -178,6 +177,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { Codemirror } from 'vue-codemirror';
 import { sql } from '@codemirror/lang-sql';
 import { oneDark } from '@codemirror/theme-one-dark';
+import {QuillEditor} from "@rafaeljunioxavier/vue-quill-fix";
 
 const route = useRoute();
 const router = useRouter();

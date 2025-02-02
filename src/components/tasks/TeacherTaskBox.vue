@@ -52,8 +52,7 @@
       </div>
       <div class="form-group">
         <label for="additionalDescription">Описание</label>
-        <textarea v-model="task.description" class="form-control mb-1" id="additionalDescription" rows="10"
-                  style="resize: none"></textarea>
+        <QuillEditor content-type="html"  v-model:content="task.description" toolbar="full" style="resize: none; min-height: 40vh"/>
       </div>
       <div class="w-100 d-flex justify-content-end">
         <button class="btn btn-success w-25" @click="saveTask">Сохранить</button>
@@ -154,6 +153,7 @@
 import axios from 'axios';
 import {onMounted, ref} from "vue";
 import {useRoute, useRouter} from "vue-router";
+import {QuillEditor} from "@rafaeljunioxavier/vue-quill-fix";
 
 const route = useRoute();
 const router = useRouter();
@@ -183,7 +183,6 @@ const goToCourse = () => {
 const fetchTaskData = async () => {
   const response = await axios.get(apiUrl + `/task/teacher/${route.params.taskId}`);
   task.value = response.data.data;
-
 };
 
 const formatDate = (dateString) => {
