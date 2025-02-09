@@ -52,7 +52,7 @@
       </div>
       <div class="form-group">
         <label for="additionalDescription">Описание</label>
-        <QuillEditor content-type="html"  v-model:content="task.description" toolbar="full" style="resize: none; min-height: 40vh"/>
+        <QuillEditor content-type="html"  v-model:content="task.description" toolbar="full" theme="snow" style="resize: none; min-height: 40vh; background-color: white"/>
       </div>
       <div class="w-100 d-flex justify-content-end">
         <button class="btn btn-success w-25" @click="saveTask">Сохранить</button>

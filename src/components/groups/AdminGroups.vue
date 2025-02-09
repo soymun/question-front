@@ -14,7 +14,7 @@
     <!-- Отображение групп -->
     <div class="row justify-content-center">
       <div v-for="group in groups" :key="group.id" class="col-md-8 mb-4">
-        <div class="card h-100 horizontal-card">
+        <div class="card h-100 horizontal-card" @click.stop="openEditDialog(group)">
           <div class="card-body d-flex justify-content-between align-items-center">
             <!-- Информация о группе -->
             <div class="info">
@@ -23,8 +23,7 @@
             </div>
 
             <!-- Кнопки управления -->
-            <div class="mt-auto d-flex flex-column">
-              <button @click.stop="openEditDialog(group)" class="btn btn-warning btn-sm mb-1">Изменить</button>
+            <div class="d-flex flex-column">
               <button @click.stop="deleteGroup(group.id)" class="btn btn-danger btn-sm">Удалить</button>
             </div>
           </div>

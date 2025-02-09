@@ -14,9 +14,6 @@
           <li class="nav-item" v-if="user()">
             <router-link class="nav-link" to="/user/courses">Моё обучение</router-link>
           </li>
-          <li class="nav-item" v-if="userSandbox()">
-            <router-link class="nav-link" to="/sandbox">Песочница</router-link>
-          </li>
           <li class="nav-item" v-if="teacher()">
             <router-link class="nav-link" to="/teacher/courses">Преподавание</router-link>
           </li>
@@ -25,6 +22,9 @@
           </li>
           <li class="nav-item" v-if="admin()">
             <router-link class="nav-link" to="/admin/groups">Группы</router-link>
+          </li>
+          <li class="nav-item" v-if="userSandbox()">
+            <router-link class="nav-link" to="/sandbox">Песочница</router-link>
           </li>
         </ul>
 

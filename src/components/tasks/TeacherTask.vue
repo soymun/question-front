@@ -115,8 +115,8 @@
             <div class="d-flex row align-content-center justify-content-center ms-5">
               <p class="mb-0">{{ user.user.firstName }} {{ user.user.secondName }}</p>
             </div>
-            <div class="d-flex row align-content-center justify-content-center me-1">
-              <p class="text-muted">Оценка: {{ getMark(user.courseMarks) }}</p>
+            <div class="d-flex align-content-center justify-content-center me-1">
+              <p class="text-muted mt-3 me-5">Оценка: {{ getMark(user.courseMarks) }}</p>
               <button @click="excludeUser(user.user.id)" class="btn btn-danger">Исключить</button>
             </div>
           </div>
@@ -203,11 +203,13 @@
              class="col-md-8">
           <div class="task-item d-flex justify-content-between align-items-center mb-2 w-100">
             <div class="d-flex justify-content-between align-items-center m-3 w-100">
-              <div class="d-flex row align-content-center justify-content-center me-1">
-                <p>Оценка: {{ mark.mark }}</p>
-                <p>Количество задач: {{ mark.countTask }}</p>
+              <div class="d-flex align-content-center justify-content-center me-1">
+                <h5 class="ms-3">{{ mark.mark }}</h5>
               </div>
-              <button @click="deleteMark(mark.id)" class="btn btn-danger">Удалить</button>
+              <div class="d-flex align-content-center justify-content-center">
+                <p class="text-muted mt-3 me-5">Количество задач: {{ mark.countTask }}</p>
+                <button @click="deleteMark(mark.id)" class="btn btn-danger">Удалить</button>
+              </div>
             </div>
           </div>
         </div>

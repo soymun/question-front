@@ -14,15 +14,14 @@
     <!-- Отображение пользователей -->
     <div class="row justify-content-center">
       <div v-for="user in users" :key="user.id" class="col-md-8 mb-4">
-        <div class="card h-100 horizontal-card">
+        <div class="card h-100 horizontal-card" @click.stop="openEditDialog(user)">
           <div class="card-body d-flex justify-content-between align-items-center">
             <div class="info">
               <h5 class="card-title">{{ user.firstName }} {{ user.secondName }}</h5>
               <p class="card-text">{{ user.email }}</p>
             </div>
             <div class="mt-auto d-flex flex-column">
-              <button @click.stop="openEditDialog(user)" class="btn btn-warning btn-sm mb-1">Изменить</button>
-              <button @click.stop="openChangePasswordDialog(user)" class="btn btn-secondary btn-sm mb-1">Сменить пароль</button>
+              <button @click.stop="openChangePasswordDialog(user)" class="btn btn-warning btn-sm mb-1">Сменить пароль</button>
               <button @click.stop="deleteUser(user.id)" class="btn btn-danger btn-sm">Удалить</button>
             </div>
           </div>

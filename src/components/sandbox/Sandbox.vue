@@ -1,5 +1,5 @@
 <template>
-  <div class="mt-5 me-5 ms-5">
+  <div class="me-5 ms-5">
     <!-- Блок для администраторов -->
     <div v-if="admin()" class="mb-4">
       <div class="d-flex align-items-end gap-3">
@@ -30,7 +30,7 @@
     </div>
 
     <!-- Блок для работы с таблицами и SQL -->
-    <div class="row">
+    <div class="row mt-5">
       <!-- Список таблиц -->
       <div class="col-md-4">
         <h5 class="mb-3">Таблицы песочницы</h5>
