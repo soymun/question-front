@@ -50,9 +50,15 @@
         <input class="form-check-input" type="checkbox" v-model="task.open" id="taskOpen">
         <label class="form-check-label" for="taskOpen">Открыта</label>
       </div>
+
+      <div class="form-group">
+        <input class="form-control mb-3" type="file" @change="handleFileUpload"/>
+      </div>
+
       <div class="form-group">
         <label for="additionalDescription">Описание</label>
-        <QuillEditor content-type="html"  v-model:content="task.description" toolbar="full" theme="snow" style="resize: none; min-height: 40vh; background-color: white"/>
+        <QuillEditor content-type="html" v-model:content="task.description" toolbar="full" theme="snow"
+                     style="resize: none; min-height: 40vh; background-color: white"/>
       </div>
       <div class="w-100 d-flex justify-content-end">
         <button class="btn btn-success w-25" @click="saveTask">Сохранить</button>
@@ -93,35 +99,38 @@
 
 
       <div v-if="openModal" class="modal-overlay" tabindex="-1">
-          <div class="modal-content w-50">
-            <div class="modal-header d-flex justify-content-between">
-              <h5 class="modal-title" id="questionModalLabel">{{ modalMode === 'edit' ? 'Изменить вопрос' : 'Добавить вопрос' }}</h5>
-              <button type="button" class="btn-close" @click="closeModel"></button>
+        <div class="modal-content w-50">
+          <div class="modal-header d-flex justify-content-between">
+            <h5 class="modal-title" id="questionModalLabel">
+              {{ modalMode === 'edit' ? 'Изменить вопрос' : 'Добавить вопрос' }}</h5>
+            <button type="button" class="btn-close" @click="closeModel"></button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="modalAnswer">Ответ</label>
+              <input
+                  type="text"
+                  v-model="modalData.answer"
+                  class="form-control"
+                  id="modalAnswer"
+                  placeholder="Введите ответ"
+              >
             </div>
-            <div class="modal-body">
-              <div class="form-group">
-                <label for="modalAnswer">Ответ</label>
-                <input
-                    type="text"
-                    v-model="modalData.answer"
-                    class="form-control"
-                    id="modalAnswer"
-                    placeholder="Введите ответ"
-                >
-              </div>
-              <div class="form-group mt-3">
-                <label for="modalRights">Правильность</label>
-                <select v-model="modalData.rights" class="form-select" id="modalRights">
-                  <option :value="true">Верен</option>
-                  <option :value="false">Не верен</option>
-                </select>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-primary" @click="saveModalData">{{ modalMode === 'edit' ? 'Изменить' : 'Добавить' }}</button>
+            <div class="form-group mt-3">
+              <label for="modalRights">Правильность</label>
+              <select v-model="modalData.rights" class="form-select" id="modalRights">
+                <option :value="true">Верен</option>
+                <option :value="false">Не верен</option>
+              </select>
             </div>
           </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" @click="saveModalData">
+              {{ modalMode === 'edit' ? 'Изменить' : 'Добавить' }}
+            </button>
+          </div>
         </div>
+      </div>
     </div>
 
 
@@ -164,6 +173,7 @@ const task = ref({
   title: '',
   open: true,
   description: '',
+  file: '',
   taskInfoQuestionBox: []
 });
 const comments = ref([]);
@@ -176,6 +186,10 @@ const modalMode = ref('add'); // режим модального окна ('add'
 const editIndex = ref(null); // индекс вопроса для редактирования
 const openModal = ref(false);
 const apiUrl = import.meta.env.VITE_API_HOST;
+const file = ref(null);
+const handleFileUpload = (event) => {
+  file.value = event.target.files[0];
+};
 
 const goToCourse = () => {
   router.push(`/teacher/courses/${route.params.id}`);
@@ -200,14 +214,14 @@ const formatDate = (dateString) => {
 // Функции для открытия модальных окон
 const openAddModal = () => {
   modalMode.value = 'add';
-  modalData.value = { answer: '', rights: true };
+  modalData.value = {answer: '', rights: true};
   openModal.value = true;
 };
 
 const openEditModal = (index) => {
   modalMode.value = 'edit';
   editIndex.value = index;
-  modalData.value = { ...task.value.taskInfoQuestionBox[index] };
+  modalData.value = {...task.value.taskInfoQuestionBox[index]};
   openModal.value = true;
 };
 
@@ -215,9 +229,9 @@ const openEditModal = (index) => {
 // Сохранение данных из модального окна
 const saveModalData = () => {
   if (modalMode.value === 'add') {
-    task.value.taskInfoQuestionBox.push({ ...modalData.value });
+    task.value.taskInfoQuestionBox.push({...modalData.value});
   } else if (modalMode.value === 'edit') {
-    task.value.taskInfoQuestionBox[editIndex.value] = { ...modalData.value };
+    task.value.taskInfoQuestionBox[editIndex.value] = {...modalData.value};
   }
 
   openModal.value = false;
@@ -234,7 +248,22 @@ const closeModel = () => {
 
 
 const saveTask = async () => {
-  await axios.post(apiUrl + '/task', task.value);
+
+  let uploadedFileName = task.value.file;
+  if (file.value) {
+    const formData = new FormData();
+    formData.append('multipartFile', file.value);
+
+    const fileResponse = await axios.post(apiUrl + '/file/save/file', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    uploadedFileName = fileResponse.data.data;
+  }
+
+  await axios.post(apiUrl + '/task', {...task.value, file: uploadedFileName});
 };
 const fetchComments = async () => {
   const response = await axios.get(apiUrl + `/comments/teacher/task/${route.params.taskId}`)

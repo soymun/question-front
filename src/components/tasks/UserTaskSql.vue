@@ -102,6 +102,10 @@
       <div class="col-md-6">
         <h5>{{taskInfo.name}}</h5>
         <p v-html="taskInfo.description"></p>
+        <a :href="`${apiUrl}/file/file/${taskInfo.file}`" v-if="taskInfo.file">
+          <i class="bi bi-file-earmark"></i>
+          <label>{{taskInfo.file}}</label>
+        </a>
       </div>
     </div>
 

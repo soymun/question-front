@@ -23,9 +23,9 @@
           <li class="nav-item" v-if="admin()">
             <router-link class="nav-link" to="/admin/groups">Группы</router-link>
           </li>
-          <li class="nav-item" v-if="userSandbox()">
-            <router-link class="nav-link" to="/sandbox">Песочница</router-link>
-          </li>
+<!--          <li class="nav-item" v-if="userSandbox()">-->
+<!--            <router-link class="nav-link" to="/sandbox">Песочница</router-link>-->
+<!--          </li>-->
         </ul>
 
         <!-- Иконка пользователя с выпадающим меню -->

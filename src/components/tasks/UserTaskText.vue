@@ -28,6 +28,10 @@
 
         <!-- Описание задачи -->
         <p class="card-text mb-5" v-html="taskInfo.description"></p>
+        <a :href="`${apiUrl}/file/file/${taskInfo.file}`" v-if="taskInfo.file">
+          <i class="bi bi-file-earmark"></i>
+          <label>{{taskInfo.file}}</label>
+        </a>
 
         <!-- Поле для ввода текста -->
         <textarea v-model="userText" class="form-control mb-3" rows="5" placeholder="Введите ответ"></textarea>

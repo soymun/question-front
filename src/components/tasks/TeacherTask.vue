@@ -26,27 +26,83 @@
 
     <div v-if="activeTab === 'tasks'">
       <div class="d-flex justify-content-end mb-3">
-        <button @click="openCreateTaskModal" class="btn btn-success" style="width: 15%">Добавить задачу</button>
+        <button @click="openCreateTaskGroupModal()" class="btn btn-success" style="width: 15%">Добавить модуль
+        </button>
       </div>
-      <div v-if="tasks.length" class="row justify-content-center">
-        <div v-for="task in tasks" :key="task.userTaskId.id" class="col-md-8">
-          <div class="task-item d-flex align-items-center justify-content-between mb-3 p-3" @click="openEditPanelTask(task.userTaskId)">
-            <div class="d-flex align-items-center w-100">
-              <div class="w-50">
-                <h5 class="mb-0">{{ task.userTaskId.number }}. {{ task.userTaskId.title.substring(0, 50) }}</h5>
+      <div v-if="taskGroups.length" class="row justify-content-center accordion" id="accordion">
+        <div v-for="taskGroup in taskGroups" :key="taskGroup.id" class="accordion-item col-md-8" :id="taskGroup.id">
+          <h2 class="accordion-header" :id="'heading' + taskGroup.id">
+            <button class="accordion-button w-100" type="button" data-bs-toggle="collapse"
+                    :data-bs-target="'#collapse' + taskGroup.id"
+                    aria-expanded="true" :aria-controls="'collapse' + taskGroup.id"
+                    @click="fetchTasksForGroup(taskGroup.id)">
+              <div class="d-flex align-items-center w-100">
+                <div class="w-50">
+                  <h5 class="mb-0">{{ taskGroup.number }}. {{ taskGroup.name }}</h5>
+                </div>
+                <div class="d-flex w-100"></div>
+                <div class="mt-auto d-flex row justify-content-center align-content-center h-100 me-1">
+                  <button @click.stop="deleteTaskGroup(taskGroup.id)" class="btn btn-danger btn-sm">Удалить</button>
+                </div>
               </div>
+            </button>
+          </h2>
+          <div :id="'collapse' + taskGroup.id" class="accordion-collapse collapse"
+               :aria-labelledby="taskGroup.id"
+               data-bs-parent="#accordion">
+            <div class="accordion-body">
+              <div v-if="tasks[taskGroup.id] && tasks[taskGroup.id].length" class="mb-2 p-3">
+                <div v-for="task in tasks[taskGroup.id]" :key="task.id" class="task-item mb-2">
+                  <div class="task-item d-flex align-items-center justify-content-between mb-3 p-3"
+                       @click="openEditPanelTask(task)">
+                    <div class="w-50">
+                      <h5 class="mb-0">{{ task.number }}. {{ task.title.substring(0, 50) }}</h5>
+                    </div>
 
-              <div class="d-flex w-100"></div>
+                    <div class="d-flex w-100"></div>
 
-              <div class="mt-auto d-flex row justify-content-center align-content-center h-100 me-1">
-                <button @click.stop="deleteTask(task.userTaskId.id)" class="btn btn-danger btn-sm">Удалить</button>
+                    <div class="mt-auto d-flex row justify-content-center align-content-center h-100 me-1">
+                      <button @click.stop="deleteTask(task.id)" class="btn btn-danger btn-sm">Удалить
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="text-center">
+                <p>Задач для данной группы нет.</p>
+              </div>
+              <div class="d-flex justify-content-center mt-3">
+                <button @click="openCreateTaskModal(taskGroup.id)" class="btn btn-success btn-sm">Добавить задачу
+                </button>
               </div>
             </div>
           </div>
         </div>
       </div>
       <div v-else class="text-center">
-        <p>Задач для данного курса нет.</p>
+        <p>Модулей для данного курса нет.</p>
+      </div>
+
+      <div v-if="isCreateTaskGroupModalVisible" class="modal-overlay">
+        <div class="modal-content w-50">
+          <div class="model-header d-flex justify-content-between">
+            <h5 class="modal-title">Создание группы задач</h5>
+            <button type="button" class="btn-close" @click="closeCreateTaskGroupModal"></button>
+          </div>
+          <form @submit.prevent="createTaskGroup">
+            <div class="form-group">
+              <label for="taskGroupNumber">Номер группы задач:</label>
+              <input type="number" v-model="newTaskGroup.number" id="taskGroupNumber" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="taskGroupName">Название группы задач:</label>
+              <input type="text" v-model="newTaskGroup.name" id="taskGroupName" class="form-control">
+            </div>
+            <div class="w-100 d-flex justify-content-end">
+              <button type="submit" class="btn btn-success mt-3">Создать группу задач</button>
+            </div>
+          </form>
+        </div>
       </div>
 
       <!-- Модальное окно для создания задачи -->
@@ -296,13 +352,13 @@
 </template>
 
 <script setup>
-import { onMounted, ref, shallowRef } from 'vue';
+import {onMounted, ref, shallowRef} from 'vue';
 import axios from 'axios';
-import { useRoute } from 'vue-router';
+import {useRoute} from 'vue-router';
 import router from "@/router.js";
-import { Codemirror } from 'vue-codemirror';
-import { sql } from '@codemirror/lang-sql';
-import { oneDark } from '@codemirror/theme-one-dark';
+import {Codemirror} from 'vue-codemirror';
+import {sql} from '@codemirror/lang-sql';
+import {oneDark} from '@codemirror/theme-one-dark';
 
 const route = useRoute();
 const isModalVisible = ref(false);
@@ -313,7 +369,8 @@ const newMark = ref({
   mark: 0,
 });
 const activeTab = ref('tasks');
-const tasks = ref([]);
+const tasks = ref({});
+const taskGroups = ref([]);
 const groups = ref([]);
 const users = ref([]);
 const marks = ref([]);
@@ -322,10 +379,16 @@ const userSql = ref('');
 const course = ref({});
 const open = ref(false);
 const prevId = ref(0)
+const isCreateTaskGroupModalVisible = ref(false);
 const isCreateTaskModalVisible = ref(false);
 const isAddUserModalVisible = ref(false);
 const isAddGroupModalVisible = ref(false);
 const isAddMarkModalVisible = ref(false);
+const newTaskGroup = ref({
+  number: 0,
+  name: '',
+  courses: route.params.id,
+});
 const newTask = ref({
   number: 0,
   name: '',
@@ -333,7 +396,8 @@ const newTask = ref({
   title: '',
   taskType: 'NONE',
   courses: route.params.id,
-  open: true,
+  taskGroup: null, // ID группы задач
+  file: '',
 });
 const usersList = ref([]);
 const groupName = ref('');
@@ -350,7 +414,15 @@ const handleReady = (payload) => {
 
 const extensions = [sql(), oneDark];
 
-const openCreateTaskModal = () => {
+const openCreateTaskGroupModal = () => {
+  isCreateTaskGroupModalVisible.value = true;
+};
+const closeCreateTaskGroupModal = () => {
+  isCreateTaskGroupModalVisible.value = false;
+};
+
+const openCreateTaskModal = (taskGroupId) => {
+  newTask.value.taskGroup = taskGroupId;
   isCreateTaskModalVisible.value = true;
 };
 const closeCreateTaskModal = () => {
@@ -376,6 +448,49 @@ const openAddMarkModal = () => {
 };
 const closeAddMarkModal = () => {
   isAddMarkModalVisible.value = false;
+};
+
+const createTaskGroup = async () => {
+  try {
+    const response = await axios.post(apiUrl + `/task-group`, newTaskGroup.value);
+    newTaskGroup.value = {
+      number: 0,
+      name: '',
+      courses: route.params.id,
+    };
+    await fetchTaskGroups(route.params.id);
+    console.log('Task group created:', response.data);
+    closeCreateTaskGroupModal();
+  } catch (error) {
+    console.error('Failed to create task group:', error);
+  }
+};
+
+const fetchTasksForGroup = async (taskGroupId) => {
+  try {
+    const response = await axios.get(apiUrl + `/task/v2/search/course/${route.params.id}/${taskGroupId}`);
+    tasks.value[taskGroupId] = response.data.data;
+  } catch (error) {
+    console.error('Failed to fetch tasks for group:', error);
+  }
+};
+
+const deleteTaskGroup = async (taskGroupId) => {
+  try {
+    const response = await axios.delete(apiUrl + `/task-group/${taskGroupId}`);
+    await fetchTaskGroups(route.params.id);
+  } catch (error) {
+    console.error('Error:', error);
+  }
+};
+
+const fetchTaskGroups = async (courseId) => {
+  try {
+    const response = await axios.get(apiUrl + `/task-group/search/course/${courseId}`);
+    taskGroups.value = response.data.data;
+  } catch (error) {
+    console.error('Failed to fetch task groups:', error);
+  }
 };
 
 const searchUsers = async () => {
@@ -420,10 +535,10 @@ const createTask = async () => {
       title: '',
       taskType: 'NONE',
       courses: route.params.id,
-      open: true,
-    }
-
-    await fetchTasks(route.params.id)
+      taskGroup: null,
+      file: '',
+    };
+    await fetchTasksForGroup(newTask.value.taskGroup);
     console.log('Task created:', response.data);
     closeCreateTaskModal();
   } catch (error) {
@@ -484,7 +599,6 @@ const deleteMark = async (markId) => {
   }
 };
 
-
 const excludeUser = async (userId) => {
   try {
     const response = await axios.delete(apiUrl + `/user/courses/user/${userId}/course/${route.params.id}`);
@@ -503,16 +617,14 @@ const excludeGroup = async (groupId) => {
   }
 };
 
-
 const deleteTask = async (taskId) => {
   try {
     const response = await axios.delete(apiUrl + `/task/${taskId}`);
-    await fetchTasks(route.params.id);
+    await fetchTasksForGroup(newTask.value.taskGroup);
   } catch (error) {
     console.error('Error:', error);
   }
 };
-
 
 const closeModalSql = () => {
   isModalVisibleSql.value = false;
@@ -525,16 +637,6 @@ const fetchCourse = async (courseId) => {
     course.value = response.data.data;
   } catch (error) {
     console.error('Failed to fetch course:', error);
-  }
-};
-
-// Fetch tasks for the course
-const fetchTasks = async (courseId) => {
-  try {
-    const response = await axios.get(apiUrl + `/task/search/user/course/${courseId}`);
-    tasks.value = response.data.data;
-  } catch (error) {
-    console.error('Failed to fetch tasks:', error);
   }
 };
 
@@ -593,13 +695,12 @@ const executeTask = async () => {
   }
 };
 
-
 onMounted(() => {
   const courseId = route.params.id;
   fetchCourse(courseId);
-  fetchTasks(courseId);
   fetchGroups(courseId);
   fetchMarks(courseId);
+  fetchTaskGroups(courseId);
 });
 </script>
 

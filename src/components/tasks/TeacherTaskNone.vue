@@ -50,6 +50,9 @@
         <input class="form-check-input" type="checkbox" v-model="task.open" id="taskOpen">
         <label class="form-check-label" for="taskOpen">Открыта</label>
       </div>
+      <div class="form-group">
+        <input class="form-control mb-3" type="file" @change="handleFileUpload"/>
+      </div>
       <div class="w-100 d-flex justify-content-end">
         <button class="btn btn-success w-25" @click="saveTask">Сохранить</button>
       </div>
@@ -105,6 +108,7 @@ const task = ref({
   title: '',
   open: true,
   description: '',
+  file: '',
 });
 const attempts = ref([]);
 const comments = ref([]);
@@ -133,9 +137,31 @@ const formatDate = (dateString) => {
   return date.toLocaleDateString('ru-RU', options).replace(',', '');
 };
 
-const saveTask = async () => {
-  await axios.post(apiUrl + '/task', task.value);
+const file = ref(null);
+const handleFileUpload = (event) => {
+  file.value = event.target.files[0];
 };
+
+
+const saveTask = async () => {
+
+  let uploadedFileName = task.value.file;
+  if (file.value) {
+    const formData = new FormData();
+    formData.append('multipartFile', file.value);
+
+    const fileResponse = await axios.post(apiUrl + '/file/save/file', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    uploadedFileName = fileResponse.data.data;
+  }
+
+  await axios.post(apiUrl + '/task', {...task.value, file: uploadedFileName});
+};
+
 const fetchComments = async () => {
   const response = await axios.get(apiUrl + `/comments/teacher/task/${route.params.taskId}`)
   comments.value = response.data.data;

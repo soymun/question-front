@@ -59,6 +59,9 @@
         <label class="form-check-label" for="taskOpen">Открыта</label>
       </div>
       <div class="form-group">
+        <input class="form-control mb-3" type="file" @change="handleFileUpload"/>
+      </div>
+      <div class="form-group">
         <label for="additionalDescription">Описание</label>
         <QuillEditor content-type="html"  v-model:content="task.description" theme="snow" toolbar="full" style="resize: none; min-height: 40vh; background-color: white"/>
       </div>
@@ -231,6 +234,7 @@ const task = ref({
   title: '',
   open: true,
   description: '',
+  file: '',
   taskInfoCode: []
 });
 const attempts = ref([]);
@@ -264,6 +268,12 @@ const closeAddDialog = () => {
   isAddDialogVisible.value = false;
   newCodeTypeId.value = null;
 };
+
+const file = ref(null);
+const handleFileUpload = (event) => {
+  file.value = event.target.files[0];
+};
+
 
 // Добавление нового типа кода
 const addCodeType = () => {
@@ -338,7 +348,21 @@ const formatDate = (dateString) => {
 
 const saveTask = async () => {
   task.value.taskInfoCode = taskInfoCode.value;
-  await axios.post(apiUrl + '/task', task.value);
+  let uploadedFileName = task.value.file;
+  if (file.value) {
+    const formData = new FormData();
+    formData.append('multipartFile', file.value);
+
+    const fileResponse = await axios.post(apiUrl + '/file/save/file', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    uploadedFileName = fileResponse.data.data;
+  }
+
+  await axios.post(apiUrl + '/task', {...task.value, file: uploadedFileName});
 };
 
 const fetchComments = async () => {

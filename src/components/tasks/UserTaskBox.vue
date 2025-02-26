@@ -26,6 +26,10 @@
       <div class="card mt-4" style="width: 60%;">
         <div class="task-section mt-3 text-wrap text-start w-100">
           <p v-html="taskInfo.description" class="m-5"></p>
+          <a :href="`${apiUrl}/file/file/${taskInfo.file}`" v-if="taskInfo.file">
+            <i class="bi bi-file-earmark"></i>
+            <label>{{taskInfo.file}}</label>
+          </a>
         </div>
         <div class="card-body">
           <div v-for="(box) in taskInfo.taskInfoQuestionBox" :key="box.id"
